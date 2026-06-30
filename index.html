@@ -4,8 +4,8 @@
   <meta charset="UTF-8">
   <title>우리 학교의 목표: 1조를 만들어야 해!</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- Google Fonts for Retro/Modern look -->
-  <link href="https://fonts.googleapis.com/css2?family=DungGeunMo&family=Outfit:wght@400;700&display=swap" rel="stylesheet">
+  <!-- Google Fonts for Retro/Modern look & School Handwriting -->
+  <link href="https://fonts.googleapis.com/css2?family=DungGeunMo&family=Nanum+Pen+Script&family=Gamja+Flower&family=Outfit:wght@400;700&display=swap" rel="stylesheet">
   
   <!-- Firebase Compat SDKs (Provides global 'firebase' object) -->
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
@@ -21,25 +21,31 @@
     
     :root {
       --bg-dark: #0f1016;
-      --panel-bg: #181a24;
-      --border-color: #2c2f40;
-      --text-main: #e2e8f0;
-      --text-muted: #718096;
+      --border-color: #cbd5e1;
+      --text-main: #334155;
+      --text-muted: #64748b;
       
-      /* Neon Theme Colors */
-      --neon-green: #00ff66;
-      --neon-blue: #00e5ff;
-      --neon-yellow: #ffea00;
-      --neon-red: #ff3366;
-      --neon-purple: #bd00ff;
+      /* School Chalk & Marker Colors */
+      --chalk-white: #ffffff;
+      --chalk-yellow: #ffea00;
+      --chalk-red: #ff3366;
+      --chalk-blue: #00e5ff;
+      --board-green: #234731;
+      --wood-brown: #5c3a21;
       
-      /* Font settings */
+      /* Fonts */
       --font-retro: 'DungGeunMo', monospace;
       --font-modern: 'Outfit', sans-serif;
+      --font-handwritten: 'Nanum Pen Script', cursive;
+      --font-chalk: 'Gamja Flower', cursive;
     }
 
     body {
-      background-color: var(--bg-dark);
+      background-image: url('school_corridor_bg.png');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
       color: var(--text-main);
       font-family: var(--font-modern);
       overflow-x: hidden;
@@ -48,16 +54,31 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
+      position: relative;
     }
 
-    /* Lobby Screen Styling */
+    /* Background shadow overlay to make dashboard highly visible */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    /* Lobby Screen Styling (Green Chalkboard) */
     #lobby-screen {
       position: fixed;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      background: radial-gradient(circle, #1e1e2f 0%, #08080f 100%);
+      background: rgba(0,0,0,0.6) url('school_corridor_bg.png') no-repeat center center;
+      background-size: cover;
       z-index: 1000;
       display: flex;
       flex-direction: column;
@@ -68,32 +89,38 @@
     }
 
     .lobby-header {
-      margin-bottom: 40px;
+      margin-bottom: 30px;
       animation: pulse 2s infinite alternate;
+      background: radial-gradient(circle, #2e583c 60%, #1c3b27 100%);
+      border: 10px solid var(--wood-brown);
+      border-radius: 8px;
+      padding: 20px 40px;
+      box-shadow: inset 0 0 10px rgba(0,0,0,0.8), 0 8px 20px rgba(0,0,0,0.6);
     }
 
     .lobby-title {
-      font-family: var(--font-retro);
-      font-size: 3rem;
-      color: var(--neon-yellow);
-      text-shadow: 0 0 10px rgba(255, 234, 0, 0.5), 0 0 20px rgba(255, 234, 0, 0.3);
-      margin-bottom: 10px;
+      font-family: var(--font-chalk);
+      font-size: 3.5rem;
+      color: var(--chalk-white);
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.6);
+      margin-bottom: 5px;
     }
 
     .lobby-subtitle {
-      font-family: var(--font-retro);
-      font-size: 1.2rem;
-      color: var(--neon-blue);
+      font-family: var(--font-chalk);
+      font-size: 1.6rem;
+      color: var(--chalk-yellow);
+      text-shadow: 1px 1px 3px rgba(0,0,0,0.6);
     }
 
     .lobby-box {
-      background: var(--panel-bg);
-      border: 3px solid var(--border-color);
+      background: radial-gradient(circle, #2a4f37 60%, #1e3a28 100%);
+      border: 12px solid var(--wood-brown);
       border-radius: 12px;
-      padding: 30px;
+      padding: 35px;
       width: 100%;
-      max-width: 450px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.5), 0 0 15px rgba(0, 229, 255, 0.1);
+      max-width: 480px;
+      box-shadow: inset 0 0 15px rgba(0,0,0,0.8), 0 10px 30px rgba(0,0,0,0.7);
       position: relative;
     }
 
@@ -104,45 +131,30 @@
 
     .lobby-label {
       display: block;
-      font-family: var(--font-retro);
-      font-size: 1rem;
-      color: var(--text-main);
+      font-family: var(--font-chalk);
+      font-size: 1.3rem;
+      color: var(--chalk-white);
       margin-bottom: 8px;
-    }
-
-    .lobby-input {
-      width: 100%;
-      padding: 12px;
-      background: #0b0c10;
-      border: 2px solid var(--border-color);
-      border-radius: 6px;
-      color: #fff;
-      font-size: 1.1rem;
-      outline: none;
-      transition: border-color 0.3s;
-    }
-
-    .lobby-input:focus {
-      border-color: var(--neon-blue);
-      box-shadow: 0 0 5px rgba(0, 229, 255, 0.5);
+      text-shadow: 1px 1px 2px #000;
     }
 
     .lobby-btn {
       width: 100%;
       padding: 14px;
-      background: linear-gradient(135deg, #0077ff 0%, #00e5ff 100%);
-      border: none;
+      background: linear-gradient(135deg, #a0522d 0%, #8b4513 100%);
+      border: 3px solid #cd853f;
       border-radius: 6px;
       color: #fff;
-      font-family: var(--font-retro);
-      font-size: 1.2rem;
+      font-family: var(--font-chalk);
+      font-size: 1.4rem;
       cursor: pointer;
-      box-shadow: 0 4px 15px rgba(0, 119, 255, 0.4);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.5);
       transition: transform 0.1s, box-shadow 0.3s;
+      text-shadow: 1px 1px 2px #000;
     }
 
     .lobby-btn:hover {
-      box-shadow: 0 6px 20px rgba(0, 229, 255, 0.6);
+      box-shadow: 0 6px 20px rgba(205, 133, 63, 0.4);
       transform: translateY(-2px);
     }
 
@@ -155,31 +167,31 @@
       top: 20px;
       right: 20px;
       padding: 8px 16px;
-      background: transparent;
-      border: 2px solid var(--neon-purple);
-      color: var(--neon-purple);
+      background: radial-gradient(circle, #2e583c 60%, #1c3b27 100%);
+      border: 3px solid var(--wood-brown);
+      color: var(--chalk-yellow);
       border-radius: 6px;
-      font-family: var(--font-retro);
-      font-size: 0.9rem;
+      font-family: var(--font-chalk);
+      font-size: 1.1rem;
       cursor: pointer;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.4);
       transition: background 0.3s, color 0.3s;
       z-index: 1001;
     }
 
     .admin-login-trigger:hover {
-      background: var(--neon-purple);
+      background: var(--wood-brown);
       color: #fff;
-      box-shadow: 0 0 10px rgba(189, 0, 255, 0.5);
     }
 
-    /* Modal Styling */
+    /* Modal Styling (Small Green Chalkboard) */
     .modal-overlay {
       position: fixed;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(0,0,0,0.85);
+      background: rgba(0,0,0,0.8);
       z-index: 2000;
       display: none;
       align-items: center;
@@ -187,31 +199,33 @@
     }
 
     .modal-content {
-      background: var(--panel-bg);
-      border: 3px solid var(--neon-purple);
+      background: radial-gradient(circle, #234731 50%, #152b1e 100%);
+      border: 8px solid var(--wood-brown);
       border-radius: 12px;
       padding: 25px;
       width: 90%;
       max-width: 380px;
       text-align: center;
-      box-shadow: 0 0 25px rgba(189, 0, 255, 0.3);
+      box-shadow: inset 0 0 10px rgba(0,0,0,0.8), 0 8px 25px rgba(0,0,0,0.6);
     }
 
     .modal-title {
-      font-family: var(--font-retro);
-      font-size: 1.3rem;
-      color: var(--neon-purple);
+      font-family: var(--font-chalk);
+      font-size: 1.5rem;
+      color: var(--chalk-white);
       margin-bottom: 15px;
+      text-shadow: 1px 1px 2px #000;
     }
 
     .modal-input {
       width: 100%;
       padding: 10px;
-      background: #0b0c10;
-      border: 2px solid var(--border-color);
+      background: #0d1a12;
+      border: 2px solid var(--wood-brown);
       border-radius: 6px;
-      color: #fff;
-      font-size: 1.2rem;
+      color: var(--chalk-yellow);
+      font-size: 1.3rem;
+      font-family: var(--font-retro);
       text-align: center;
       letter-spacing: 5px;
       outline: none;
@@ -228,92 +242,114 @@
       padding: 10px;
       border: none;
       border-radius: 6px;
-      font-family: var(--font-retro);
-      font-size: 1rem;
+      font-family: var(--font-chalk);
+      font-size: 1.2rem;
       cursor: pointer;
     }
 
     .modal-btn.confirm {
-      background: var(--neon-purple);
+      background: var(--wood-brown);
       color: #fff;
+      border: 1px solid #7c4e2f;
     }
 
     .modal-btn.cancel {
-      background: #333;
-      color: var(--text-main);
+      background: #111;
+      color: var(--chalk-white);
     }
 
     /* Game Interface Layout */
     #game-container {
       display: none;
       width: 100%;
-      max-width: 1200px;
+      max-width: 1260px;
       height: 100vh;
       max-height: 850px;
       padding: 15px;
       flex-direction: column;
       gap: 15px;
+      z-index: 10;
     }
 
-    /* Header & Timer */
+    /* Header Chalkboard Banner */
     .game-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      background: var(--panel-bg);
-      border: 2px solid var(--border-color);
+      background: radial-gradient(circle, #234731 50%, #152b1e 100%);
+      border: 8px solid var(--wood-brown);
+      box-shadow: inset 0 0 10px rgba(0,0,0,0.8), 0 4px 10px rgba(0,0,0,0.5);
       border-radius: 8px;
       padding: 10px 20px;
-      font-family: var(--font-retro);
+      font-family: var(--font-chalk);
+      position: relative;
     }
 
     .game-title-info {
-      font-size: 1.1rem;
-      color: var(--neon-blue);
+      font-size: 1.4rem;
+      color: var(--chalk-white);
+      display: flex;
+      align-items: center;
+    }
+
+    /* Small Post-it Note for Class Unity Badge */
+    .stick-badge {
+      background: #fffb96;
+      color: #111;
+      padding: 3px 8px;
+      border: 1px dashed #e6db55;
+      transform: rotate(-3deg);
+      font-family: var(--font-handwritten);
+      font-size: 1rem;
+      margin-left: 15px;
+      display: inline-block;
+      box-shadow: 1px 1px 3px rgba(0,0,0,0.3);
     }
 
     .game-mode-badge {
-      padding: 4px 8px;
+      padding: 3px 8px;
       border-radius: 4px;
-      font-size: 0.85rem;
+      font-size: 0.95rem;
+      font-family: var(--font-chalk);
       font-weight: bold;
+      margin-left: 10px;
     }
 
     .badge-student {
       background: rgba(0, 229, 255, 0.15);
-      border: 1px solid var(--neon-blue);
-      color: var(--neon-blue);
+      border: 1px solid var(--chalk-blue);
+      color: var(--chalk-blue);
     }
 
     .badge-admin {
-      background: rgba(189, 0, 255, 0.15);
+      background: rgba(189, 0, 255, 0.2);
       border: 1px solid var(--neon-purple);
       color: var(--neon-purple);
     }
 
     .timer-display {
-      font-size: 1.3rem;
-      color: var(--neon-red);
-      text-shadow: 0 0 5px rgba(255, 51, 102, 0.5);
+      font-size: 1.5rem;
+      color: var(--chalk-red);
+      text-shadow: 0 0 2px rgba(0,0,0,0.5);
     }
 
-    /* Top Billboard (전광판) */
+    /* Top Billboard (Chalkboard Ticker Strip) */
     .billboard-container {
-      background: #09090d;
-      border: 2px solid #ff5500;
-      box-shadow: 0 0 10px rgba(255, 85, 0, 0.2);
+      background: radial-gradient(circle, #2a4e38 60%, #1b3826 100%);
+      border: 6px solid var(--wood-brown);
+      box-shadow: inset 0 0 8px rgba(0,0,0,0.8), 0 3px 6px rgba(0,0,0,0.4);
       border-radius: 8px;
-      padding: 12px 20px;
+      padding: 10px 20px;
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 8px;
     }
 
     .billboard-ticker {
-      font-family: var(--font-retro);
-      font-size: 1.1rem;
-      color: #ffaa00;
-      text-shadow: 0 0 5px rgba(255, 170, 0, 0.5);
+      font-family: var(--font-chalk);
+      font-size: 1.2rem;
+      color: var(--chalk-yellow);
+      text-shadow: 1px 1px 2px #000;
       white-space: nowrap;
       overflow: hidden;
       text-align: center;
@@ -328,8 +364,8 @@
     .progress-bar-outer {
       flex: 1;
       height: 24px;
-      background: #151520;
-      border: 2px solid #444;
+      background: #111;
+      border: 2px solid #5a3c25;
       border-radius: 12px;
       overflow: hidden;
       position: relative;
@@ -338,8 +374,8 @@
     .progress-bar-inner {
       height: 100%;
       width: 0%;
-      background: linear-gradient(90deg, #00bb33 0%, #00ff66 100%);
-      box-shadow: 0 0 10px var(--neon-green);
+      background: linear-gradient(90deg, #ff8800 0%, #ff5500 100%);
+      box-shadow: 0 0 8px #ff5500;
       transition: width 0.5s ease-out;
     }
 
@@ -352,18 +388,18 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      font-family: var(--font-retro);
-      font-size: 0.85rem;
+      font-family: var(--font-chalk);
+      font-size: 1.05rem;
       color: #fff;
-      text-shadow: 1px 1px 2px #000;
+      text-shadow: 1px 1px 3px #000;
       font-weight: bold;
     }
 
     .goal-tag {
-      font-family: var(--font-retro);
-      font-size: 1rem;
-      color: var(--neon-green);
-      text-shadow: 0 0 4px var(--neon-green);
+      font-family: var(--font-chalk);
+      font-size: 1.1rem;
+      color: var(--chalk-yellow);
+      text-shadow: 1px 1px 1px #000;
     }
 
     /* Main Dashboard Layout */
@@ -371,53 +407,55 @@
       flex: 1;
       display: flex;
       gap: 15px;
-      min-height: 0; /* Important for flex child scrolling */
+      min-height: 0;
     }
 
-    /* Canvas Frame */
+    /* Canvas Frame (Styled as a blueprint board / sheet) */
     .canvas-wrapper {
       flex: 1.4;
-      background: #000;
-      border: 3px solid var(--border-color);
-      border-radius: 10px;
+      background: #0c0d14;
+      border: 10px solid var(--wood-brown);
+      border-radius: 8px;
       position: relative;
       overflow: hidden;
       display: flex;
       align-items: center;
       justify-content: center;
+      box-shadow: 0 6px 15px rgba(0,0,0,0.5);
     }
 
     #game-canvas {
       display: block;
       width: 100%;
       height: 100%;
-      background: #08080f;
+      background: #0c0d14;
     }
 
-    /* Space Alert Overlay on Canvas */
+    /* Sticky tape style room overlay banner on canvas */
     .room-overlay-banner {
       position: absolute;
       top: 15px;
       left: 15px;
-      background: rgba(0,0,0,0.7);
-      border: 1.5px solid var(--neon-blue);
-      border-radius: 4px;
-      padding: 6px 12px;
-      font-family: var(--font-retro);
-      font-size: 0.9rem;
-      color: var(--neon-blue);
+      background: rgba(0, 119, 255, 0.85);
+      border-bottom: 2px solid #0055bb;
+      border-radius: 3px;
+      padding: 4px 10px;
+      font-family: var(--font-handwritten);
+      font-size: 1.3rem;
+      color: #fff;
       pointer-events: none;
       z-index: 10;
+      box-shadow: 1px 2px 4px rgba(0,0,0,0.3);
     }
 
-    /* Secret Value Reveal Modal (One time at start) */
+    /* Secret Value Reveal Modal Card */
     .secret-popup-overlay {
       position: absolute;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(0,0,0,0.9);
+      background: rgba(0,0,0,0.85);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -425,80 +463,83 @@
     }
 
     .secret-card {
-      background: #1b1e2a;
-      border: 4px solid var(--neon-blue);
-      border-radius: 16px;
+      background: radial-gradient(circle, #2e583c 60%, #1c3b27 100%);
+      border: 10px solid var(--wood-brown);
+      border-radius: 12px;
       padding: 30px;
       width: 85%;
       max-width: 420px;
       text-align: center;
-      box-shadow: 0 0 30px rgba(0, 229, 255, 0.4);
+      box-shadow: inset 0 0 10px rgba(0,0,0,0.8), 0 8px 25px rgba(0,0,0,0.7);
       animation: card-appear 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
 
     .secret-card-title {
-      font-family: var(--font-retro);
-      font-size: 1.6rem;
-      color: #fff;
+      font-family: var(--font-chalk);
+      font-size: 1.8rem;
+      color: var(--chalk-white);
       margin-bottom: 20px;
-      border-bottom: 2px dashed var(--border-color);
+      border-bottom: 2px dashed rgba(255,255,255,0.2);
       padding-bottom: 10px;
+      text-shadow: 1px 1px 2px #000;
     }
 
     .secret-role-box {
-      font-family: var(--font-retro);
-      font-size: 1.8rem;
+      font-family: var(--font-chalk);
+      font-size: 2rem;
       margin: 15px 0;
-      padding: 10px;
+      padding: 8px;
       border-radius: 8px;
     }
 
     .role-citizen {
-      background: rgba(0, 255, 102, 0.1);
+      background: rgba(0, 255, 102, 0.08);
       border: 2px solid var(--neon-green);
       color: var(--neon-green);
     }
 
     .role-mafia {
-      background: rgba(255, 51, 102, 0.1);
+      background: rgba(255, 51, 102, 0.08);
       border: 2px solid var(--neon-red);
       color: var(--neon-red);
     }
 
     .secret-value-box {
-      font-family: var(--font-retro);
-      font-size: 3rem;
-      color: #fff;
-      text-shadow: 0 0 10px #fff;
+      font-family: var(--font-chalk);
+      font-size: 3.5rem;
+      color: var(--chalk-yellow);
+      text-shadow: 2px 2px 4px #000;
       margin: 20px 0;
     }
 
     .secret-warning {
-      font-size: 0.85rem;
-      color: var(--text-muted);
+      font-size: 0.9rem;
+      color: #9ab3a3;
       margin-bottom: 25px;
       line-height: 1.4;
+      font-family: var(--font-chalk);
     }
 
     .secret-close-btn {
       width: 100%;
       padding: 12px;
-      background: #00e5ff;
-      color: #000;
-      border: none;
+      background: linear-gradient(135deg, #a0522d 0%, #8b4513 100%);
+      color: #fff;
+      border: 2px solid #cd853f;
       border-radius: 8px;
-      font-family: var(--font-retro);
-      font-size: 1.1rem;
+      font-family: var(--font-chalk);
+      font-size: 1.2rem;
       font-weight: bold;
       cursor: pointer;
       transition: background 0.3s;
+      text-shadow: 1px 1px 2px #000;
     }
 
     .secret-close-btn:hover {
-      background: #00b4cc;
+      background: #7c3f11;
     }
 
-    /* Right Sidebar Panels */
+    /* Right Sidebar Panels (Whiteboards) */
     .sidebar-panel {
       flex: 1;
       display: flex;
@@ -510,32 +551,90 @@
     }
 
     .panel-card {
-      background: var(--panel-bg);
-      border: 2px solid var(--border-color);
+      background: #ffffff;
+      color: #111111;
+      border: 6px solid #b0b5bc; /* Silver frame */
       border-radius: 8px;
-      padding: 12px;
+      padding: 10px 10px 26px 10px; /* bottom tray space */
       display: flex;
       flex-direction: column;
+      position: relative;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+    }
+
+    /* Whiteboard Tray Shelf */
+    .panel-card::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 6px;
+      right: 6px;
+      height: 8px;
+      background: linear-gradient(to bottom, #e2e8f0 0%, #cbd5e1 50%, #94a3b8 100%);
+      border-radius: 2px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    }
+
+    /* Whiteboard pen markers and eraser graphics inside the tray */
+    .pen-tray {
+      position: absolute;
+      bottom: 8px;
+      right: 20px;
+      display: flex;
+      gap: 6px;
+      align-items: flex-end;
+      pointer-events: none;
+      z-index: 5;
+    }
+
+    .pen-red {
+      width: 14px;
+      height: 3px;
+      background: #ef4444;
+      border-radius: 1px;
+    }
+
+    .pen-blue {
+      width: 14px;
+      height: 3px;
+      background: #3b82f6;
+      border-radius: 1px;
+    }
+
+    .pen-black {
+      width: 14px;
+      height: 3px;
+      background: #1e293b;
+      border-radius: 1px;
+    }
+
+    .eraser {
+      width: 22px;
+      height: 6px;
+      background: #475569;
+      border-top: 2px solid #64748b;
+      border-radius: 1.5px;
     }
 
     .panel-title {
       font-family: var(--font-retro);
       font-size: 0.95rem;
-      color: var(--text-main);
+      color: #1e293b;
       margin-bottom: 8px;
-      border-bottom: 1px solid var(--border-color);
+      border-bottom: 2px dashed #e2e8f0;
       padding-bottom: 4px;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      font-weight: bold;
     }
 
     /* Minimap View */
     .minimap-wrapper {
       position: relative;
       height: 170px;
-      background: #0c0d14;
-      border: 1.5px solid var(--border-color);
+      background: #faf8f0; /* Whiteboard color */
+      border: 2px solid var(--border-color);
       border-radius: 6px;
       overflow: hidden;
     }
@@ -554,18 +653,19 @@
 
     .chat-log-box {
       flex: 1;
-      background: #0c0d14;
-      border: 1.5px solid var(--border-color);
+      background: #f8fafc;
+      border: 2px solid var(--border-color);
       border-radius: 6px;
       padding: 8px;
       overflow-y: auto;
-      font-size: 0.85rem;
-      font-family: var(--font-retro);
+      font-size: 0.95rem;
+      font-family: var(--font-handwritten);
       line-height: 1.4;
       display: flex;
       flex-direction: column;
       gap: 4px;
       min-height: 0;
+      color: #1e293b;
     }
 
     .chat-msg-row {
@@ -574,19 +674,22 @@
 
     .chat-name {
       font-weight: bold;
+      color: #0f172a;
     }
 
     .chat-system {
-      color: var(--neon-yellow);
+      color: #0284c7;
     }
 
     .chat-privacy-alert {
-      color: var(--neon-purple);
+      color: #475569;
       text-align: center;
       margin-top: auto;
       margin-bottom: auto;
-      font-size: 0.8rem;
+      font-size: 1.25rem;
+      font-family: var(--font-handwritten);
       line-height: 1.6;
+      font-weight: bold;
     }
 
     /* Control Panel Cards */
@@ -602,37 +705,37 @@
 
     .cctv-btn {
       padding: 6px;
-      background: #252838;
-      border: 1.5px solid var(--border-color);
+      background: #f1f5f9;
+      border: 2px solid var(--border-color);
       border-radius: 4px;
-      color: var(--text-main);
-      font-family: var(--font-retro);
-      font-size: 0.8rem;
+      color: #334155;
+      font-family: var(--font-chalk);
+      font-size: 0.95rem;
       cursor: pointer;
       transition: all 0.2s;
     }
 
     .cctv-btn:hover {
-      background: #34384e;
-      border-color: var(--neon-blue);
+      background: #e2e8f0;
+      border-color: #94a3b8;
     }
 
     .cctv-btn.active {
-      background: rgba(0, 229, 255, 0.15);
-      border-color: var(--neon-blue);
-      color: var(--neon-blue);
-      box-shadow: 0 0 5px rgba(0, 229, 255, 0.3);
+      background: #dbeafe;
+      border-color: #3b82f6;
+      color: #1d4ed8;
+      box-shadow: 0 0 5px rgba(59, 130, 246, 0.4);
     }
 
     /* Multiply Action Trigger Button */
     .multiply-btn {
       padding: 10px;
-      background: #222;
-      border: 2px solid #555;
+      background: #e2e8f0;
+      border: 2px solid var(--border-color);
       border-radius: 6px;
-      color: #777;
-      font-family: var(--font-retro);
-      font-size: 1.05rem;
+      color: #94a3b8;
+      font-family: var(--font-chalk);
+      font-size: 1.2rem;
       font-weight: bold;
       text-align: center;
       cursor: not-allowed;
@@ -640,12 +743,13 @@
     }
 
     .multiply-btn.active {
-      background: linear-gradient(135deg, #00aa33 0%, #00ff66 100%);
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
       border-color: #fff;
       color: #fff;
       cursor: pointer;
-      box-shadow: 0 0 15px var(--neon-green);
+      box-shadow: 0 0 15px rgba(16, 185, 129, 0.5);
       animation: neon-blink 1s infinite alternate;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
     }
 
     /* Swapper panel */
@@ -658,35 +762,35 @@
     .swapper-select {
       flex: 1;
       padding: 5px;
-      background: #222;
-      color: #fff;
-      border: 1px solid var(--border-color);
+      background: #f8fafc;
+      color: #1e293b;
+      border: 2px solid var(--border-color);
       border-radius: 4px;
       outline: none;
-      font-family: var(--font-retro);
-      font-size: 0.85rem;
+      font-family: var(--font-chalk);
+      font-size: 0.95rem;
     }
 
     .call-btn {
       padding: 5px 10px;
-      background: #333;
-      border: 1px solid #555;
+      background: #f1f5f9;
+      border: 2px solid var(--border-color);
       border-radius: 4px;
-      color: #fff;
-      font-family: var(--font-retro);
-      font-size: 0.8rem;
+      color: #334155;
+      font-family: var(--font-chalk);
+      font-size: 0.9rem;
       cursor: pointer;
     }
 
     .call-btn:hover {
-      background: #444;
+      background: #e2e8f0;
     }
 
     /* Firebase Panel */
     .firebase-details summary {
       cursor: pointer;
-      font-family: var(--font-retro);
-      font-size: 0.85rem;
+      font-family: var(--font-chalk);
+      font-size: 0.95rem;
       color: var(--text-muted);
       user-select: none;
     }
@@ -706,82 +810,98 @@
     .firebase-input {
       flex: 1;
       padding: 4px 6px;
-      background: #111;
-      border: 1.5px solid var(--border-color);
+      background: #f8fafc;
+      border: 2px solid var(--border-color);
       border-radius: 4px;
-      color: #fff;
-      font-size: 0.75rem;
+      color: #1e293b;
+      font-size: 0.8rem;
       outline: none;
     }
 
     .firebase-btn {
       padding: 6px;
       background: #ff8800;
-      color: #000;
+      color: #fff;
       border: none;
       border-radius: 4px;
-      font-family: var(--font-retro);
-      font-size: 0.8rem;
+      font-family: var(--font-chalk);
+      font-size: 0.9rem;
       font-weight: bold;
       cursor: pointer;
+      text-shadow: 1px 1px 1px rgba(0,0,0,0.3);
     }
 
     .firebase-status {
-      font-size: 0.75rem;
-      font-family: var(--font-retro);
-      color: var(--neon-yellow);
+      font-size: 0.85rem;
+      font-family: var(--font-chalk);
+      color: #ffaa00;
       text-align: center;
     }
 
-    /* Bottom Chat Area (Visible only to Student) */
+    /* Bottom Chat Area (Whiteboard Pencil Shelf) */
     .chat-input-bar {
       display: flex;
-      background: var(--panel-bg);
-      border: 2px solid var(--border-color);
+      background: #ffffff;
+      border: 6px solid #b0b5bc; /* Silver frame */
       border-radius: 8px;
       padding: 8px;
       gap: 8px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+      position: relative;
+    }
+
+    .chat-input-bar::after {
+      content: '';
+      position: absolute;
+      bottom: -6px;
+      left: 10px;
+      right: 10px;
+      height: 4px;
+      background: #94a3b8;
+      border-radius: 1px;
     }
 
     .chat-input-field {
       flex: 1;
       padding: 10px 14px;
-      background: #0b0c10;
-      border: 1.5px solid var(--border-color);
+      background: #f8fafc;
+      border: 2px solid var(--border-color);
       border-radius: 6px;
-      color: #fff;
-      font-size: 0.95rem;
+      color: #1e293b;
+      font-size: 1.05rem;
+      font-family: var(--font-handwritten);
       outline: none;
     }
 
     .chat-input-field:focus {
-      border-color: var(--neon-blue);
+      border-color: #3b82f6;
     }
 
     .chat-send-btn {
       padding: 0 20px;
-      background: var(--neon-blue);
-      color: #000;
+      background: #3b82f6;
+      color: #fff;
       border: none;
       border-radius: 6px;
-      font-family: var(--font-retro);
-      font-size: 1rem;
+      font-family: var(--font-chalk);
+      font-size: 1.1rem;
       font-weight: bold;
       cursor: pointer;
     }
 
     .chat-send-btn:hover {
-      background: #00b4cc;
+      background: #2563eb;
     }
 
-    /* End Screen Overlay */
+    /* End Screen Overlay (Chalkboard Report Card) */
     #end-screen {
       position: fixed;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(3, 3, 5, 0.95);
+      background: rgba(0, 0, 0, 0.7) url('school_corridor_bg.png') no-repeat center center;
+      background-size: cover;
       z-index: 5000;
       display: none;
       flex-direction: column;
@@ -792,54 +912,57 @@
     }
 
     .end-container {
-      background: var(--panel-bg);
+      background: radial-gradient(circle, #2e583c 60%, #1c3b27 100%);
+      border: 12px solid var(--wood-brown);
       border-radius: 16px;
       padding: 40px;
       width: 100%;
       max-width: 750px;
       text-align: center;
-      box-shadow: 0 0 50px rgba(0,0,0,0.8);
+      box-shadow: inset 0 0 15px rgba(0,0,0,0.8), 0 10px 40px rgba(0,0,0,0.8);
       max-height: 90vh;
       overflow-y: auto;
       display: flex;
       flex-direction: column;
       gap: 25px;
+      color: #ffffff;
     }
 
     .end-result-banner {
-      font-family: var(--font-retro);
-      font-size: 2.8rem;
-      text-shadow: 0 0 15px rgba(255,255,255,0.2);
+      font-family: var(--font-chalk);
+      font-size: 3.5rem;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.6);
     }
 
     .banner-success {
-      color: var(--neon-green);
-      text-shadow: 0 0 15px var(--neon-green);
+      color: var(--chalk-yellow);
+      text-shadow: 0 0 10px var(--chalk-yellow);
     }
 
     .banner-fail {
-      color: var(--neon-red);
-      text-shadow: 0 0 15px var(--neon-red);
+      color: var(--chalk-red);
+      text-shadow: 0 0 10px var(--chalk-red);
     }
 
     .end-stats {
-      font-family: var(--font-retro);
-      font-size: 1.1rem;
-      color: var(--neon-yellow);
-      background: #0b0c10;
-      padding: 10px;
+      font-family: var(--font-chalk);
+      font-size: 1.3rem;
+      color: var(--chalk-yellow);
+      background: #0d1a12;
+      padding: 12px;
       border-radius: 8px;
-      border: 1px solid var(--border-color);
+      border: 2px solid var(--wood-brown);
     }
 
     .end-section-title {
-      font-family: var(--font-retro);
-      font-size: 1.2rem;
+      font-family: var(--font-chalk);
+      font-size: 1.4rem;
       color: #fff;
       text-align: left;
       margin-bottom: 10px;
-      border-left: 4px solid var(--neon-blue);
+      border-left: 5px solid var(--chalk-blue);
       padding-left: 8px;
+      text-shadow: 1px 1px 1px #000;
     }
 
     .end-list-grid {
@@ -850,23 +973,24 @@
     }
 
     .end-student-badge {
-      background: #252838;
-      border: 1.5px solid var(--border-color);
+      background: #142a1e;
+      border: 2px solid rgba(255,255,255,0.1);
       border-radius: 6px;
       padding: 8px;
-      font-family: var(--font-retro);
-      font-size: 0.85rem;
+      font-family: var(--font-chalk);
+      font-size: 1rem;
       text-align: center;
+      color: #fff;
     }
 
     .end-student-badge.mafia-highlight {
-      border: 1.5px solid var(--neon-red);
-      color: var(--neon-red);
-      background: rgba(255, 51, 102, 0.05);
+      border: 2px solid var(--chalk-red);
+      color: var(--chalk-red);
+      background: rgba(255, 51, 102, 0.08);
     }
 
     .red-border-box {
-      border: 3px solid var(--neon-red) !important;
+      border: 4px solid var(--chalk-red) !important;
       border-radius: 12px;
       padding: 20px 15px;
       background: rgba(255, 51, 102, 0.03);
@@ -875,22 +999,22 @@
 
     .end-restart-btn {
       padding: 15px 30px;
-      background: var(--neon-yellow);
+      background: var(--chalk-yellow);
       color: #000;
       border: none;
       border-radius: 8px;
-      font-family: var(--font-retro);
-      font-size: 1.2rem;
+      font-family: var(--font-chalk);
+      font-size: 1.3rem;
       font-weight: bold;
       cursor: pointer;
       align-self: center;
-      box-shadow: 0 0 15px rgba(255, 234, 0, 0.3);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
       transition: transform 0.2s;
     }
 
     .end-restart-btn:hover {
       transform: scale(1.05);
-      box-shadow: 0 0 25px rgba(255, 234, 0, 0.5);
+      box-shadow: 0 6px 15px rgba(255, 234, 0, 0.6);
     }
 
     /* Keyframe Animations */
@@ -906,7 +1030,7 @@
 
     @keyframes neon-blink {
       0% { opacity: 0.8; }
-      100% { opacity: 1; box-shadow: 0 0 20px var(--neon-green), 0 0 5px var(--neon-green); }
+      100% { opacity: 1; box-shadow: 0 0 20px rgba(16, 185, 129, 0.8), 0 0 5px rgba(16, 185, 129, 0.8); }
     }
 
     /* Float alert above table */
@@ -915,17 +1039,18 @@
       bottom: 120px;
       left: 50%;
       transform: translateX(-50%);
-      background: rgba(0, 0, 0, 0.85);
-      border: 2px solid var(--neon-yellow);
+      background: rgba(0, 0, 0, 0.9);
+      border: 2px solid var(--chalk-yellow);
       border-radius: 8px;
-      color: var(--neon-yellow);
+      color: var(--chalk-yellow);
       padding: 10px 20px;
-      font-family: var(--font-retro);
-      font-size: 0.95rem;
+      font-family: var(--font-chalk);
+      font-size: 1.2rem;
       z-index: 1000;
       animation: card-appear 0.3s;
       pointer-events: none;
       text-align: center;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.4);
     }
   </style>
 </head>
@@ -941,11 +1066,12 @@
     </div>
 
     <div class="lobby-box">
-      <div class="lobby-input-group">
-        <label class="lobby-label" for="player-nickname">학생 이름 입력</label>
-        <input type="text" id="player-nickname" class="lobby-input" placeholder="학생 이름을 적어주세요">
+      <div class="lobby-input-group" style="text-align: center;">
+        <label class="lobby-label" style="text-align: center; display: block;">부여된 당신의 수학 닉네임</label>
+        <div id="player-nickname-display" style="font-family: var(--font-chalk); font-size: 2.2rem; color: var(--chalk-yellow); margin: 15px 0; padding: 10px; border: 2px dashed var(--chalk-white); border-radius: 8px; background: rgba(0, 0, 0, 0.2); text-align: center;">고독한 피타고라스</div>
+        <button class="call-btn" onclick="rerollPlayerNickname()" style="font-size: 1.15rem; padding: 8px 16px; margin: 0 auto; display: block; border-color: var(--chalk-yellow); color: var(--chalk-yellow); background: transparent; font-family: var(--font-chalk); cursor: pointer; border-radius: 6px;">🎲 다른 이름 조합</button>
       </div>
-      <button class="lobby-btn" onclick="joinAsStudent()">🎮 게임 참가하기</button>
+      <button class="lobby-btn" onclick="joinAsStudent()" style="margin-top: 15px;">🎮 게임 참가하기</button>
     </div>
   </div>
 
@@ -967,7 +1093,8 @@
     <header class="game-header">
       <div class="game-title-info">
         <span>우리 학교의 목표: 1조를 만들어야 해!</span>
-        <span id="role-badge" class="game-mode-badge badge-student" style="margin-left: 10px;">학생</span>
+        <span class="stick-badge">한마음</span>
+        <span id="role-badge" class="game-mode-badge badge-student">학생</span>
       </div>
       <div class="timer-display" id="game-timer">남은 시간: 10:00</div>
     </header>
@@ -996,7 +1123,7 @@
         <div id="secret-reveal" class="secret-popup-overlay" style="display: none;">
           <div class="secret-card">
             <h3 class="secret-card-title">당신의 비밀 카드</h3>
-            <p style="font-size: 0.95rem; color: var(--text-main);">게임에 부여된 당신의 신분과 비밀의 값입니다.</p>
+            <p style="font-size: 0.95rem; color: var(--chalk-white);">게임에 부여된 당신의 신분과 비밀의 값입니다.</p>
             <div id="secret-role" class="secret-role-box role-citizen">시민 (일반 학생)</div>
             <div id="secret-value" class="secret-value-box">2</div>
             <p class="secret-warning">
@@ -1021,6 +1148,12 @@
           <div class="minimap-wrapper">
             <canvas id="minimap-canvas" width="300" height="170"></canvas>
           </div>
+          <div class="pen-tray">
+            <span class="pen-black"></span>
+            <span class="pen-red"></span>
+            <span class="pen-blue"></span>
+            <span class="eraser"></span>
+          </div>
         </div>
 
         <!-- Chat Log Card -->
@@ -1028,6 +1161,12 @@
           <div class="panel-title" id="chat-title">현재 공간 채팅 로그 (강당)</div>
           <div class="chat-log-box" id="room-chat-log">
             <!-- Messages go here -->
+          </div>
+          <div class="pen-tray">
+            <span class="pen-black"></span>
+            <span class="pen-red"></span>
+            <span class="pen-blue"></span>
+            <span class="eraser"></span>
           </div>
         </div>
 
@@ -1044,19 +1183,25 @@
           </div>
           
           <button class="multiply-btn" id="multiply-action-btn" onclick="triggerMultiply()">곱셈연산 발동</button>
+          <div class="pen-tray">
+            <span class="pen-black"></span>
+            <span class="pen-red"></span>
+            <span class="pen-blue"></span>
+            <span class="eraser"></span>
+          </div>
         </div>
 
         <!-- Simulated Play Utilities -->
         <div class="panel-card" style="gap: 8px;">
           <div class="panel-title">테스트 도구 (로컬 시뮬레이션 전용)</div>
           <div class="swapper-row">
-            <span style="font-size:0.8rem; font-family: var(--font-retro);">조작 아바타:</span>
+            <span style="font-size:0.8rem; font-family: var(--font-chalk);">조작 아바타:</span>
             <select class="swapper-select" id="avatar-swapper" onchange="swapActivePlayer(this.value)">
               <!-- Options populated dynamically -->
             </select>
           </div>
           <div class="swapper-row">
-            <span style="font-size:0.8rem; font-family: var(--font-retro);">소환 기능:</span>
+            <span style="font-size:0.8rem; font-family: var(--font-chalk);">소환 기능:</span>
             <button class="call-btn" onclick="callNPCToDesk('left')">← 좌측 의자</button>
             <button class="call-btn" onclick="callNPCToDesk('right')">우측 의자 →</button>
           </div>
@@ -1180,12 +1325,12 @@
     const VIEWPORT_HEIGHT = 550;
 
     const ROOMS = {
-      auditorium: { name: '강당', color: '#161224', x: 200, y: 50, w: 600, h: 600, wallColor: '#2b1c4b' },
-      class1: { name: '교실 1', color: '#0d1624', x: 50, y: 700, w: 300, h: 300, wallColor: '#1a334d' },
-      class2: { name: '교실 2', color: '#0d1624', x: 650, y: 700, w: 300, h: 300, wallColor: '#1a334d' },
-      toilet: { name: '화장실', color: '#0d2222', x: 50, y: 1100, w: 300, h: 300, wallColor: '#1a4040' },
-      storage: { name: '창고', color: '#1f1610', x: 650, y: 1100, w: 300, h: 300, wallColor: '#3c2415' },
-      hallway: { name: '복도', color: '#242018', x: 350, y: 650, w: 300, h: 1100, wallColor: '#4d3a24' }
+      auditorium: { name: '강당', color: '#faf8f0', x: 200, y: 50, w: 600, h: 600, wallColor: '#475569' },
+      class1: { name: '교실 1', color: '#faf8f0', x: 50, y: 700, w: 300, h: 300, wallColor: '#475569' },
+      class2: { name: '교실 2', color: '#faf8f0', x: 650, y: 700, w: 300, h: 300, wallColor: '#475569' },
+      toilet: { name: '화장실', color: '#faf8f0', x: 50, y: 1100, w: 300, h: 300, wallColor: '#475569' },
+      storage: { name: '창고', color: '#faf8f0', x: 650, y: 1100, w: 300, h: 300, wallColor: '#475569' },
+      hallway: { name: '복도', color: '#faf8f0', x: 350, y: 650, w: 300, h: 1100, wallColor: '#475569' }
     };
 
     const DOORS = {
@@ -1203,12 +1348,59 @@
     const RIGHT_SEAT_X = 550;
     const RIGHT_SEAT_Y = 1650;
 
-    // Names pool for generating 30 students
-    const STUDENT_NAMES = [
-      "홍길동", "김영희", "이철수", "박민수", "최지혜", "정우성", "한지민", "강동원", "송혜교", "유재석",
-      "김태희", "이민호", "박신혜", "현빈", "손예진", "공유", "김고은", "이병헌", "전지현", "조인성",
-      "신민아", "이승기", "수지", "박보검", "아이유", "송중기", "한효주", "소지섭", "김우빈", "정해인"
+    // Math-themed Nickname Parts
+    const ADJECTIVES = [
+      "고독한", "행복한", "졸린", "시크한", "열정적인", "도도한", "날카로운", "유연한", "미스테리한", "단순한",
+      "복잡한", "용감한", "수줍은", "차분한", "예리한", "평화로운", "진지한", "명랑한", "신비로운", "영리한",
+      "신속한", "느긋한", "꼼꼼한", "엉뚱한", "독특한", "화려한", "우아한", "터프한", "신비한", "상냥한"
     ];
+
+    const MATH_NOUNS = [
+      "피타고라스", "사각형", "정육면체", "소수", "삼각형", "원주율", "로그", "미분", "적분", "수열",
+      "방정식", "기하학", "벡터", "함수", "행렬", "알고리즘", "피보나치", "타원", "포물선", "프랙탈",
+      "사인", "코사인", "탄젠트", "지수", "다항식", "인수분해", "무한대", "확률", "통계", "위상"
+    ];
+
+    let generatedNames = [];
+
+    function generateUniqueNicknames() {
+      let adjCopy = [...ADJECTIVES];
+      let nounCopy = [...MATH_NOUNS];
+
+      // Shuffle
+      for (let i = adjCopy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [adjCopy[i], adjCopy[j]] = [adjCopy[j], adjCopy[i]];
+      }
+      for (let i = nounCopy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [nounCopy[i], nounCopy[j]] = [nounCopy[j], nounCopy[i]];
+      }
+
+      generatedNames = [];
+      for (let i = 0; i < 30; i++) {
+        generatedNames.push(`${adjCopy[i]} ${nounCopy[i]}`);
+      }
+    }
+
+    function updateLobbyNicknameDisplay() {
+      const display = document.getElementById('player-nickname-display');
+      if (display) {
+        display.textContent = generatedNames[0];
+      }
+    }
+
+    function rerollPlayerNickname() {
+      playSound('click');
+      generateUniqueNicknames();
+      updateLobbyNicknameDisplay();
+    }
+
+    // Run nickname generator initially
+    generateUniqueNicknames();
+    window.addEventListener('DOMContentLoaded', () => {
+      updateLobbyNicknameDisplay();
+    });
 
     // --- 3. State Management ---
     let myId = '';
@@ -1253,7 +1445,7 @@
       for (let i = 1; i <= 30; i++) {
         const opt = document.createElement('option');
         opt.value = `student_${i}`;
-        opt.textContent = `학생 ${i}: ${STUDENT_NAMES[i-1]}`;
+        opt.textContent = `학생 ${i}: ${generatedNames[i-1]}`;
         swapper.appendChild(opt);
       }
     }
@@ -1268,16 +1460,15 @@
     }
 
     function formatNumber(num) {
-      if (num >= 1000000000000) {
-        return (num / 1000000000000).toFixed(2) + "조";
-      }
-      if (num >= 100000000) {
-        return (num / 100000000).toFixed(2) + "억";
-      }
-      if (num >= 10000) {
-        return (num / 10000).toFixed(2) + "만";
-      }
-      return num.toLocaleString();
+      if (num === 0) return "0";
+      const exponent = Math.round(Math.log2(num));
+      return `2^${exponent}`;
+    }
+
+    function formatNumberHTML(num) {
+      if (num === 0) return "0";
+      const exponent = Math.round(Math.log2(num));
+      return `2<sup>${exponent}</sup>`;
     }
 
     // --- 5. Collision Detection & Room Constraining Physics ---
@@ -1468,14 +1659,7 @@
 
     function joinAsStudent() {
       playSound('click');
-      const nickname = document.getElementById('player-nickname').value.trim();
-      
-      // Auto-assign username if empty
       myId = 'student_1'; // Local play controlled by student_1 by default
-      if (nickname) {
-        STUDENT_NAMES[0] = nickname;
-      }
-      
       isAdmin = false;
       enterGame();
     }
@@ -1544,7 +1728,7 @@
       
       for (let i = 1; i <= 30; i++) {
         const id = `student_${i}`;
-        const name = STUDENT_NAMES[i-1];
+        const name = generatedNames[i-1];
         const isMafia = mafiaIndices.includes(i);
         
         // Generate a random distinct neon pixel color
@@ -1587,11 +1771,12 @@
       if (me.isMafia) {
         roleBox.textContent = "방해자 (마피아)";
         roleBox.className = "secret-role-box role-mafia";
-        valBox.textContent = "0";
+        valBox.innerHTML = "0";
       } else {
         roleBox.textContent = "일반 학생 (시민)";
         roleBox.className = "secret-role-box role-citizen";
-        valBox.textContent = "2";
+        const exponent = Math.round(Math.log2(me.secretValue));
+        valBox.innerHTML = `2<sup>${exponent}</sup>`;
       }
       
       modal.style.display = 'flex';
@@ -1911,40 +2096,47 @@
       // Apply camera translate
       ctx.translate(-camera.x, -camera.y);
 
-      // 1. Draw entire school base floor & grid lines
-      ctx.fillStyle = '#050508';
+      // 1. Draw entire school base floor (dark void outside rooms)
+      ctx.fillStyle = '#0c0d14';
       ctx.fillRect(0, 0, MAP_WIDTH, MAP_HEIGHT);
       
-      // Draw grid floor lines
-      ctx.strokeStyle = '#12131a';
-      ctx.lineWidth = 1;
-      for (let x = 0; x < MAP_WIDTH; x += 50) {
-        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, MAP_HEIGHT); ctx.stroke();
-      }
-      for (let y = 0; y < MAP_HEIGHT; y += 50) {
-        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(MAP_WIDTH, y); ctx.stroke();
-      }
-
-      // 2. Render Room Areas
+      // 2. Render Room Areas & Inner Graph Grids
       for (const key in ROOMS) {
         const r = ROOMS[key];
         ctx.fillStyle = r.color;
         ctx.fillRect(r.x, r.y, r.w, r.h);
+        
+        // Draw grid lines inside this room (graph paper style)
+        ctx.strokeStyle = '#e2e8f0';
+        ctx.lineWidth = 1;
+        for (let gx = Math.ceil(r.x / 40) * 40; gx < r.x + r.w; gx += 40) {
+          ctx.beginPath(); ctx.moveTo(gx, r.y); ctx.lineTo(gx, r.y + r.h); ctx.stroke();
+        }
+        for (let gy = Math.ceil(r.y / 40) * 40; gy < r.y + r.h; gy += 40) {
+          ctx.beginPath(); ctx.moveTo(r.x, gy); ctx.lineTo(r.x + r.w, gy); ctx.stroke();
+        }
 
-        // Draw double line border for walls
+        // Draw double line border for walls (marker outline style)
         ctx.strokeStyle = r.wallColor;
         ctx.lineWidth = 4;
         ctx.strokeRect(r.x, r.y, r.w, r.h);
         
-        // Fill room title
-        ctx.fillStyle = r.wallColor;
-        ctx.font = '20px DungGeunMo';
-        ctx.fillText(r.name, r.x + 20, r.y + 35);
+        // Fill room title with handwriting marker font
+        ctx.fillStyle = '#0f172a'; // Black marker ink
+        ctx.font = 'bold 36px "Nanum Pen Script", cursive';
+        ctx.textAlign = 'center';
+        if (key === 'hallway') {
+          ctx.fillText(r.name, r.x + r.w / 2, r.y + 120);
+          ctx.fillText(r.name, r.x + r.w / 2, r.y + r.h - 120);
+        } else {
+          ctx.fillText(r.name, r.x + r.w / 2, r.y + r.h / 2 + 10);
+        }
+        ctx.textAlign = 'left';
       }
 
-      // 3. Clear Doorway lines in walls to represent openings
+      // 3. Clear Doorway lines in walls to represent openings (matches room floor color)
       ctx.lineWidth = 6;
-      ctx.strokeStyle = '#242018'; // Hallway floor color (door matches hallway)
+      ctx.strokeStyle = '#faf8f0'; 
       
       for (const k in DOORS) {
         const d = DOORS[k];
@@ -1995,22 +2187,22 @@
     }
 
     function drawComputationDesk() {
-      // Draw left seat
-      ctx.fillStyle = '#ff3366';
-      ctx.fillRect(LEFT_SEAT_X - 10, LEFT_SEAT_Y - 10, 20, 20);
-      ctx.strokeStyle = '#fff';
-      ctx.lineWidth = 1.5;
-      ctx.strokeRect(LEFT_SEAT_X - 10, LEFT_SEAT_Y - 10, 20, 20);
+      // Draw left seat (red cushion)
+      ctx.fillStyle = '#ef4444';
+      ctx.fillRect(LEFT_SEAT_X - 12, LEFT_SEAT_Y - 12, 24, 24);
+      ctx.strokeStyle = '#0f172a';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(LEFT_SEAT_X - 12, LEFT_SEAT_Y - 12, 24, 24);
 
-      // Draw right seat
-      ctx.fillStyle = '#00ff66';
-      ctx.fillRect(RIGHT_SEAT_X - 10, RIGHT_SEAT_Y - 10, 20, 20);
-      ctx.strokeRect(RIGHT_SEAT_X - 10, RIGHT_SEAT_Y - 10, 20, 20);
+      // Draw right seat (green cushion)
+      ctx.fillStyle = '#10b981';
+      ctx.fillRect(RIGHT_SEAT_X - 12, RIGHT_SEAT_Y - 12, 24, 24);
+      ctx.strokeRect(RIGHT_SEAT_X - 12, RIGHT_SEAT_Y - 12, 24, 24);
 
-      // Draw table block
-      ctx.fillStyle = '#4a2c11';
+      // Draw table block (wooden desk)
+      ctx.fillStyle = '#8b4513';
       ctx.fillRect(DESK_X - 25, DESK_Y - 15, 50, 30);
-      ctx.strokeStyle = '#c68a4c';
+      ctx.strokeStyle = '#0f172a';
       ctx.strokeRect(DESK_X - 25, DESK_Y - 15, 50, 30);
 
       // Glowing display screen on desk
@@ -2019,9 +2211,9 @@
       ctx.fillRect(DESK_X - 10, DESK_Y - 8, 20, 16);
       
       // Text "X"
-      ctx.fillStyle = '#fff';
-      ctx.font = '10px DungGeunMo';
-      ctx.fillText('×', DESK_X - 4, DESK_Y + 4);
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '12px DungGeunMo';
+      ctx.fillText('×', DESK_X - 5, DESK_Y + 5);
     }
 
     function drawSparkles(x, y) {
@@ -2030,7 +2222,7 @@
         const py = y + (Math.random() - 0.5) * 80;
         const size = 3 + Math.random() * 5;
         
-        ctx.fillStyle = i % 2 === 0 ? varColor('--neon-blue') : varColor('--neon-green');
+        ctx.fillStyle = i % 2 === 0 ? '#00e5ff' : '#00ff66';
         ctx.fillRect(px - size/2, py - size/2, size, size);
       }
     }
@@ -2048,7 +2240,7 @@
 
       // Highlight active controlled avatar ring
       if (s.id === currentControlledId && !isAdmin) {
-        ctx.strokeStyle = varColor('--neon-yellow');
+        ctx.strokeStyle = '#ef4444'; // Red whiteboard marker ring
         ctx.lineWidth = 2.5;
         ctx.beginPath();
         ctx.ellipse(s.x, s.y + 12, s.radius * 1.2, 8, 0, 0, Math.PI * 2);
@@ -2094,12 +2286,19 @@
         ctx.fillRect(s.x + 2, s.y - 6, 2, 3); // Right eye
       }
 
-      // Name banner above head
-      ctx.fillStyle = '#fff';
-      ctx.font = '11px DungGeunMo';
+      // Name banner above head (outlined for maximum legibility on light floors)
+      ctx.font = 'bold 11px DungGeunMo';
       ctx.textAlign = 'center';
       
       const dispName = s.id === currentControlledId ? `[나] ${s.name}` : s.name;
+      
+      // Draw white outline
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 3.5;
+      ctx.strokeText(dispName, s.x, s.y - s.radius - 8);
+      
+      // Fill text in charcoal dark marker color
+      ctx.fillStyle = '#0f172a';
       ctx.fillText(dispName, s.x, s.y - s.radius - 8);
     }
 
@@ -2150,7 +2349,9 @@
 
     // --- 15. Minimap Render ---
     function drawMinimap() {
-      minimapCtx.clearRect(0, 0, 300, 170);
+      // Draw whiteboard paper background
+      minimapCtx.fillStyle = '#faf8f0';
+      minimapCtx.fillRect(0, 0, 300, 170);
 
       const scaleX = 0.27;
       const scaleY = 0.085;
@@ -2165,19 +2366,30 @@
         const rw = r.w * scaleX;
         const rh = r.h * scaleY;
 
-        minimapCtx.fillStyle = '#151624';
+        // Custom marker outline colors matching the reference image
+        let strokeColor = '#475569'; // Hallway/Default: Grey-black marker
+        if (k === 'auditorium' || k === 'class1' || k === 'class2') {
+          strokeColor = '#10b981'; // Green marker
+        } else if (k === 'toilet') {
+          strokeColor = '#ef4444'; // Red marker
+        } else if (k === 'storage') {
+          strokeColor = '#3b82f6'; // Blue marker
+        }
+
+        minimapCtx.fillStyle = '#ffffff'; // Whiteboard room interior
         minimapCtx.fillRect(rx, ry, rw, rh);
-        minimapCtx.strokeStyle = '#32364c';
-        minimapCtx.lineWidth = 1.5;
+        minimapCtx.strokeStyle = strokeColor;
+        minimapCtx.lineWidth = 2;
         minimapCtx.strokeRect(rx, ry, rw, rh);
 
-        minimapCtx.fillStyle = '#515878';
-        minimapCtx.font = '9px DungGeunMo';
-        minimapCtx.fillText(r.name[0] + (r.name[1] || ''), rx + 4, ry + 12);
+        // Draw handwritten room titles
+        minimapCtx.fillStyle = '#0f172a'; // Black marker text
+        minimapCtx.font = 'bold 11px "Nanum Pen Script", cursive';
+        minimapCtx.fillText(r.name, rx + 4, ry + 12);
       }
 
       // Draw Desk
-      minimapCtx.fillStyle = varColor('--neon-yellow');
+      minimapCtx.fillStyle = varColor('--chalk-yellow') || '#ffea00';
       minimapCtx.fillRect(DESK_X * scaleX + ox - 4, DESK_Y * scaleY + oy - 2, 8, 4);
 
       // Draw character dots
@@ -2349,7 +2561,7 @@
       display.textContent = `남은 시간: ${formatTime}`;
       
       if (timerValue <= 60) {
-        display.style.color = varColor('--neon-red');
+        display.style.color = varColor('--chalk-red') || '#ff3366';
       } else {
         display.style.color = '';
       }
@@ -2383,9 +2595,9 @@
       ticker.textContent = scanMessage;
       
       const billboard = document.querySelector('.billboard-container');
-      billboard.style.borderColor = varColor('--neon-yellow');
+      billboard.style.borderColor = varColor('--chalk-yellow') || '#ffea00';
       setTimeout(() => {
-        billboard.style.borderColor = '#ff5500';
+        billboard.style.borderColor = 'var(--wood-brown)';
       }, 2000);
       
       if (maxVal >= 1099511627776) {
@@ -2474,7 +2686,7 @@
           const s = students[id];
           const badge = document.createElement('div');
           badge.className = 'end-student-badge';
-          badge.innerHTML = `<strong>${s.name}</strong><br>값: ${formatNumber(s.secretValue)}`;
+          badge.innerHTML = `<strong>${s.name}</strong><br>값: ${formatNumberHTML(s.secretValue)}`;
 
           if (s.secretValue === 0) {
             badge.classList.add('mafia-highlight');
@@ -2494,7 +2706,7 @@
           const s = students[id];
           const badge = document.createElement('div');
           badge.className = 'end-student-badge';
-          badge.innerHTML = `<strong>${s.name}</strong><br>값: ${formatNumber(s.secretValue)}`;
+          badge.innerHTML = `<strong>${s.name}</strong><br>값: ${formatNumberHTML(s.secretValue)}`;
 
           if (s.secretValue === 0) {
             successList.appendChild(badge);
@@ -2547,7 +2759,7 @@
         fbRoomRef = fbDatabase.ref('rooms/school_session_1');
 
         document.getElementById('firebase-status-text').textContent = "네트워크 상태: Firebase 실시간 연결됨";
-        document.getElementById('firebase-status-text').style.color = varColor('--neon-green');
+        document.getElementById('firebase-status-text').style.color = '#10b981'; // Green marker
 
         uploadLocalStateToFirebase();
         setupFirebaseSyncListeners();
@@ -2558,7 +2770,7 @@
         alert("연결 중 오류 발생: " + err.message);
         isFirebaseConnected = false;
         document.getElementById('firebase-status-text').textContent = "네트워크 상태: 연결 실패 (로컬 모드)";
-        document.getElementById('firebase-status-text').style.color = varColor('--neon-red');
+        document.getElementById('firebase-status-text').style.color = '#ef4444'; // Red marker
       }
     }
 
