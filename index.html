@@ -2377,22 +2377,7 @@
       }
     }
 
-    function triggerBubbleChat(userId, text) {
-      const s = students[userId];
-      
-      const roomName = ROOMS[currentRoom].name;
-      chatTitle.textContent = `현재 공간 대화 로그 (${roomName})`;
-      
-      chatLogBox.innerHTML = '';
-      const archive = chatArchives[currentRoom] || [];
-      archive.forEach(item => {
-        const row = document.createElement('div');
-        row.className = 'chat-msg-row';
-        row.innerHTML = `<span class="chat-system">[${item.time}]</span> <span class="chat-name">${item.name}</span>: ${item.msg}`;
-        chatLogBox.appendChild(row);
-      });
-      chatLogBox.scrollTop = chatLogBox.scrollHeight;
-    }
+
 
     // --- 12. CCTV Spectating snaps ---
     function setCCTV(room) {
@@ -4032,6 +4017,9 @@
               localUser.y = remoteUser.y;
               localUser.room = remoteUser.currentRoom;
               localUser.direction = remoteUser.direction;
+            }
+            if (remoteUser.name) {
+              localUser.name = remoteUser.name;
             }
             localUser.secretValue = remoteUser.secretValue;
             localUser.multipliedWithStr = remoteUser.multipliedWithStr || '';
