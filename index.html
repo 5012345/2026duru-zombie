@@ -267,10 +267,9 @@
     /* Game Interface Layout */
     #game-container {
       display: none;
-      width: 100%;
-      max-width: 1260px;
-      height: 100vh;
-      max-height: 850px;
+      width: 98vw;
+      max-width: 1750px; /* Expand layout width for PC views */
+      height: calc(100vh - 30px); /* Expand height to fill screen */
       padding: 15px;
       flex-direction: column;
       gap: 15px;
@@ -552,8 +551,26 @@
       flex-direction: column;
       gap: 15px;
       min-width: 320px;
-      max-width: 380px;
+      max-width: 420px; /* Allow wider panel elements on PC */
       min-height: 0;
+      overflow-y: auto; /* Enable scrollbar to prevent bottom elements cut-off */
+      padding-right: 6px; /* Spacing for scrollbar */
+    }
+
+    /* Custom Chalkboard Scrollbar styling for sidebar */
+    .sidebar-panel::-webkit-scrollbar {
+      width: 8px;
+    }
+    .sidebar-panel::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.1);
+      border-radius: 4px;
+    }
+    .sidebar-panel::-webkit-scrollbar-thumb {
+      background: var(--wood-brown);
+      border-radius: 4px;
+    }
+    .sidebar-panel::-webkit-scrollbar-thumb:hover {
+      background: #7c4c23;
     }
 
     .panel-card {
