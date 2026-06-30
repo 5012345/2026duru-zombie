@@ -1178,7 +1178,7 @@
             <button class="cctv-btn" id="cctv-class1" onclick="setCCTV('class1')">교실 1</button>
             <button class="cctv-btn" id="cctv-class2" onclick="setCCTV('class2')">교실 2</button>
             <button class="cctv-btn" id="cctv-hallway" onclick="setCCTV('hallway')">복도</button>
-            <button class="cctv-btn" id="cctv-toilet" onclick="setCCTV('toilet')">화장실</button>
+            <button class="cctv-btn" id="cctv-toilet" onclick="setCCTV('toilet')">컴퓨터실</button>
             <button class="cctv-btn" id="cctv-storage" onclick="setCCTV('storage')">창고</button>
           </div>
           
@@ -1328,7 +1328,7 @@
       auditorium: { name: '강당', color: '#faf8f0', x: 200, y: 50, w: 600, h: 600, wallColor: '#475569' },
       class1: { name: '교실 1', color: '#faf8f0', x: 50, y: 700, w: 300, h: 300, wallColor: '#475569' },
       class2: { name: '교실 2', color: '#faf8f0', x: 650, y: 700, w: 300, h: 300, wallColor: '#475569' },
-      toilet: { name: '화장실', color: '#faf8f0', x: 50, y: 1100, w: 300, h: 300, wallColor: '#475569' },
+      toilet: { name: '컴퓨터실', color: '#faf8f0', x: 50, y: 1100, w: 300, h: 300, wallColor: '#475569' },
       storage: { name: '창고', color: '#faf8f0', x: 650, y: 1100, w: 300, h: 300, wallColor: '#475569' },
       hallway: { name: '복도', color: '#faf8f0', x: 350, y: 650, w: 300, h: 1100, wallColor: '#475569' }
     };
@@ -1838,7 +1838,7 @@
             if (Math.random() < 0.05) {
               const chatPhrases = [
                 "1조 언제 만들어?", "비밀번호 알아?", "나 2 곱했어!", "마피아 누구냐?", 
-                "복도 연산대로 모이자", "화장실 같이 가실 분", "비밀값 궁금하다", "0 있으면 말해줘"
+                "복도 연산대로 모이자", "컴퓨터실 같이 가실 분", "비밀값 궁금하다", "0 있으면 말해줘"
               ];
               triggerBubbleChat(s.id, chatPhrases[Math.floor(Math.random() * chatPhrases.length)]);
             }
@@ -2248,67 +2248,309 @@
           ctx.fillRect(lx, r.y + r.h - 26, 35, 4);
         }
       } else if (key === 'auditorium') {
-        // Large auditorium floor (wooden)
-        ctx.fillStyle = '#ebdcb9';
+        // Vertical wood floorboards (gymnasium style, Photo 3)
+        ctx.fillStyle = '#dfc8b2';
         ctx.fillRect(r.x, r.y, r.w, r.h);
-        
-        // Grid board lines
-        ctx.strokeStyle = '#d2c1aa';
+        ctx.strokeStyle = '#ceb397';
         ctx.lineWidth = 1;
-        for (let gx = r.x + 40; gx < r.x + r.w; gx += 40) {
-          ctx.beginPath(); ctx.moveTo(gx, r.y); ctx.lineTo(gx, r.y + r.h); ctx.stroke();
-        }
-        for (let gy = r.y + 40; gy < r.y + r.h; gy += 40) {
-          ctx.beginPath(); ctx.moveTo(r.x, gy); ctx.lineTo(r.x + r.w, gy); ctx.stroke();
+        for (let x = r.x + 15; x < r.x + r.w; x += 15) {
+          ctx.beginPath(); ctx.moveTo(x, r.y); ctx.lineTo(x, r.y + r.h); ctx.stroke();
         }
 
-        // Podium stage at top center
-        ctx.fillStyle = '#8b4513';
-        ctx.fillRect(r.x + r.w / 2 - 50, r.y + 20, 100, 30);
-        ctx.strokeStyle = '#5c3a21';
-        ctx.strokeRect(r.x + r.w / 2 - 50, r.y + 20, 100, 30);
-        ctx.fillStyle = '#faf8f0';
-        ctx.font = '10px var(--font-retro)';
-        ctx.fillText('STAGE', r.x + r.w / 2 - 15, r.y + 38);
-      } else if (key === 'toilet') {
-        // Tile Floor
-        ctx.fillStyle = '#cbd5e1';
-        ctx.fillRect(r.x, r.y, r.w, r.h);
-        ctx.strokeStyle = '#94a3b8';
+        // Draw spectator bleachers lining the left and right walls (wooden blocks)
+        ctx.fillStyle = '#d2c1aa';
+        ctx.fillRect(r.x + 2, r.y + 10, 18, r.h - 20);
+        ctx.fillRect(r.x + r.w - 20, r.y + 10, 18, r.h - 20);
+        ctx.strokeStyle = '#8b4513';
         ctx.lineWidth = 1.5;
-        for (let gx = r.x + 30; gx < r.x + r.w; gx += 30) {
-          ctx.beginPath(); ctx.moveTo(gx, r.y); ctx.lineTo(gx, r.y + r.h); ctx.stroke();
-        }
-        for (let gy = r.y + 30; gy < r.y + r.h; gy += 30) {
-          ctx.beginPath(); ctx.moveTo(r.x, gy); ctx.lineTo(r.x + r.w, gy); ctx.stroke();
-        }
-        // Draw sinks
-        ctx.fillStyle = '#ffffff';
-        for (let i = 0; i < 3; i++) {
-          ctx.beginPath(); ctx.arc(r.x + 40 + i * 50, r.y + 15, 8, 0, Math.PI * 2); ctx.fill();
-          ctx.strokeStyle = '#475569'; ctx.stroke();
-        }
-      } else if (key === 'storage') {
-        // Concrete floor
-        ctx.fillStyle = '#a1a1aa';
-        ctx.fillRect(r.x, r.y, r.w, r.h);
-        // Draw wooden boxes
-        ctx.fillStyle = '#d97706';
+        ctx.strokeRect(r.x + 2, r.y + 10, 18, r.h - 20);
+        ctx.strokeRect(r.x + r.w - 20, r.y + 10, 18, r.h - 20);
+
+        // Large wood stage with steps at top center
+        ctx.fillStyle = '#b45309'; // Dark stage floor
+        ctx.fillRect(r.x + 80, r.y + 15, r.w - 160, 60);
         ctx.strokeStyle = '#7c2d12';
         ctx.lineWidth = 2;
-        const boxes = [
-          {x: r.x + 30, y: r.y + 30}, {x: r.x + 180, y: r.y + 40},
-          {x: r.x + 60, y: r.y + 180}, {x: r.x + 200, y: r.y + 200}
-        ];
-        boxes.forEach(b => {
-          ctx.fillRect(b.x, b.y, 40, 40);
-          ctx.strokeRect(b.x, b.y, 40, 40);
-          // Draw 'X' inside
-          ctx.beginPath();
-          ctx.moveTo(b.x, b.y); ctx.lineTo(b.x + 40, b.y + 40);
-          ctx.moveTo(b.x + 40, b.y); ctx.lineTo(b.x, b.y + 40);
-          ctx.stroke();
+        ctx.strokeRect(r.x + 80, r.y + 15, r.w - 160, 60);
+
+        // Curtains & Projector screen on stage
+        ctx.fillStyle = '#dc2626'; // Red curtain panels left/right
+        ctx.fillRect(r.x + 85, r.y + 15, 30, 60);
+        ctx.fillRect(r.x + r.w - 115, r.y + 15, 30, 60);
+        ctx.fillStyle = '#e2e8f0'; // Screen in center
+        ctx.fillRect(r.x + 130, r.y + 18, r.w - 260, 45);
+        ctx.strokeStyle = '#475569';
+        ctx.strokeRect(r.x + 130, r.y + 18, r.w - 260, 45);
+
+        // Stage steps (left/right of stage)
+        ctx.fillStyle = '#dfc8b2';
+        ctx.fillRect(r.x + 50, r.y + 25, 30, 40);
+        ctx.strokeRect(r.x + 50, r.y + 25, 30, 40);
+        ctx.fillRect(r.x + r.w - 80, r.y + 25, 30, 40);
+        ctx.strokeRect(r.x + r.w - 80, r.y + 25, 30, 40);
+
+        // Windows on top wall left/right
+        ctx.fillStyle = '#bae6fd';
+        ctx.fillRect(r.x + 25, r.y + 2, 20, 10);
+        ctx.fillRect(r.x + r.w - 45, r.y + 2, 20, 10);
+
+        // Wall mounted basketball hoop (top right)
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(r.x + r.w - 40, r.y + 20, 15, 12); // board
+        ctx.strokeStyle = '#dc2626'; ctx.strokeRect(r.x + r.w - 40, r.y + 20, 15, 12);
+        ctx.fillStyle = '#dc2626'; ctx.fillRect(r.x + r.w - 45, r.y + 28, 5, 2); // hoop
+        // standing hoop (top left)
+        ctx.fillStyle = '#475569'; ctx.fillRect(r.x + 35, r.y + 35, 4, 30); // post
+        ctx.fillStyle = '#ffffff'; ctx.fillRect(r.x + 27, r.y + 25, 20, 12); // backboard
+        ctx.strokeStyle = '#dc2626'; ctx.strokeRect(r.x + 27, r.y + 25, 20, 12);
+
+        // Scoreboard (top right)
+        ctx.fillStyle = '#1e293b';
+        ctx.fillRect(r.x + r.w - 45, r.y + 60, 20, 14);
+        ctx.fillStyle = '#ef4444';
+        ctx.font = '8px monospace';
+        ctx.fillText('7  8', r.x + r.w - 42, r.y + 70);
+
+        // Two Soccer Goals
+        // Left goal (white net)
+        ctx.strokeStyle = '#475569'; ctx.lineWidth = 2.5;
+        ctx.strokeRect(r.x + 70, r.y + 160, 80, 50); // post frame
+        ctx.lineWidth = 1; ctx.strokeStyle = 'rgba(0,0,0,0.15)'; // net mesh
+        for (let gx = r.x + 75; gx < r.x + 150; gx += 8) {
+          ctx.beginPath(); ctx.moveTo(gx, r.y + 160); ctx.lineTo(gx, r.y + 210); ctx.stroke();
+        }
+        // Right goal (red/white striped)
+        ctx.strokeStyle = '#dc2626'; ctx.lineWidth = 2.5;
+        ctx.strokeRect(r.x + r.w - 150, r.y + 160, 80, 50);
+        // white stripe markings
+        ctx.strokeStyle = '#ffffff';
+        ctx.beginPath();
+        for (let sy = r.y + 165; sy < r.y + 210; sy += 15) {
+          ctx.moveTo(r.x + r.w - 150, sy); ctx.lineTo(r.x + r.w - 150, sy + 6);
+          ctx.moveTo(r.x + r.w - 70, sy); ctx.lineTo(r.x + r.w - 70, sy + 6);
+        }
+        ctx.stroke();
+
+        // Gymnastics Vaulting Box (bottom center)
+        ctx.fillStyle = '#b45309';
+        ctx.fillRect(r.x + r.w/2 - 15, r.y + 320, 30, 22);
+        ctx.fillStyle = '#faf8f0'; // white leather cushion
+        ctx.fillRect(r.x + r.w/2 - 16, r.y + 316, 32, 6);
+        ctx.strokeStyle = '#7c2d12'; ctx.lineWidth = 1;
+        ctx.strokeRect(r.x + r.w/2 - 15, r.y + 320, 30, 22);
+
+        // Two Gym Benches (bottom left)
+        ctx.fillStyle = '#8b4513';
+        ctx.fillRect(r.x + 60, r.y + 280, 70, 8);
+        ctx.fillRect(r.x + 60, r.y + 340, 70, 8);
+        ctx.fillStyle = '#10b981'; // green legs
+        ctx.fillRect(r.x + 65, r.y + 288, 3, 5);
+        ctx.fillRect(r.x + 122, r.y + 288, 3, 5);
+        ctx.fillRect(r.x + 65, r.y + 348, 3, 5);
+        ctx.fillRect(r.x + 122, r.y + 348, 3, 5);
+
+        // Sports Ball cage cart (bottom right)
+        ctx.fillStyle = '#475569';
+        ctx.fillRect(r.x + r.w - 75, r.y + 310, 45, 35);
+        ctx.strokeStyle = '#1e293b'; ctx.lineWidth = 1.5;
+        ctx.strokeRect(r.x + r.w - 75, r.y + 310, 45, 35);
+        // Vertical steel bars
+        for (let bx = r.x + r.w - 70; bx < r.x + r.w - 30; bx += 8) {
+          ctx.beginPath(); ctx.moveTo(bx, r.y + 310); ctx.lineTo(bx, r.y + 345); ctx.stroke();
+        }
+        // Draw orange balls inside cage
+        ctx.fillStyle = '#f97316';
+        ctx.beginPath(); ctx.arc(r.x + r.w - 65, r.y + 335, 6, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(r.x + r.w - 45, r.y + 332, 6, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(r.x + r.w - 53, r.y + 325, 6, 0, Math.PI * 2); ctx.fill();
+      } else if (key === 'toilet') {
+        // --- 컴퓨터실 (Toilet key repurposed as Computer Lab, Photo 2) ---
+        // Light pinkish beige floor carpet
+        ctx.fillStyle = '#eeddcc';
+        ctx.fillRect(r.x, r.y, r.w, r.h);
+
+        // Whiteboard on frame (top left)
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(r.x + 15, r.y + 12, 50, 24);
+        ctx.strokeStyle = '#94a3b8'; ctx.lineWidth = 2.5;
+        ctx.strokeRect(r.x + 15, r.y + 12, 50, 24);
+        // stand legs
+        ctx.beginPath();
+        ctx.moveTo(r.x + 22, r.y + 36); ctx.lineTo(r.x + 22, r.y + 44);
+        ctx.moveTo(r.x + 58, r.y + 36); ctx.lineTo(r.x + 58, r.y + 44);
+        ctx.stroke();
+
+        // Projector screen (center top)
+        ctx.fillStyle = '#2563eb'; // HDMI blue screen
+        ctx.fillRect(r.x + 85, r.y + 10, 80, 22);
+        ctx.strokeStyle = '#475569'; ctx.lineWidth = 2;
+        ctx.strokeRect(r.x + 85, r.y + 10, 80, 22);
+        ctx.fillStyle = '#ffffff'; ctx.font = 'bold 8px sans-serif';
+        ctx.fillText('HDMI', r.x + 92, r.y + 24);
+
+        // Teacher's desk on right
+        ctx.fillStyle = '#8b4513';
+        ctx.fillRect(r.x + 185, r.y + 25, 75, 26);
+        ctx.strokeStyle = '#5c3a21'; ctx.strokeRect(r.x + 185, r.y + 25, 75, 26);
+        // Monitor on teacher's desk
+        ctx.fillStyle = '#334155';
+        ctx.fillRect(r.x + 215, r.y + 28, 20, 12);
+        // Blue swivel chair
+        ctx.fillStyle = '#22d3ee';
+        ctx.beginPath(); ctx.arc(r.x + 225, r.y + 18, 7, 0, Math.PI * 2); ctx.fill();
+
+        // Podium/Lectern (left center)
+        ctx.fillStyle = '#b45309';
+        ctx.fillRect(r.x + 60, r.y + 55, 30, 20);
+        // iPad/tablet drawing
+        ctx.fillStyle = '#64748b';
+        ctx.fillRect(r.x + 70, r.y + 58, 12, 8);
+
+        // Student Computers: 6 Workstations (arranged in 2 columns of 3)
+        // Col 1 (x: r.x + 30), Col 2 (x: r.x + 160)
+        const cols = [r.x + 30, r.x + 160];
+        const rowYs = [r.y + 100, r.y + 165, r.y + 230];
+        
+        cols.forEach(cx => {
+          rowYs.forEach(cy => {
+            // Desk (white/grey)
+            ctx.fillStyle = '#f1f5f9';
+            ctx.fillRect(cx, cy, 75, 26);
+            ctx.strokeStyle = '#94a3b8'; ctx.lineWidth = 1;
+            ctx.strokeRect(cx, cy, 75, 26);
+
+            // Computer monitor (blue browser screen)
+            ctx.fillStyle = '#1e293b'; // border
+            ctx.fillRect(cx + 20, cy + 2, 28, 16);
+            ctx.fillStyle = '#0284c7'; // screen
+            ctx.fillRect(cx + 22, cy + 4, 24, 12);
+
+            // Keyboard/Mouse
+            ctx.fillStyle = '#64748b';
+            ctx.fillRect(cx + 15, cy + 20, 25, 3); // keyboard
+            ctx.fillStyle = '#334155';
+            ctx.fillRect(cx + 48, cy + 20, 3, 3); // mouse
+
+            // Black swivel chair with yellow cushion
+            ctx.fillStyle = '#0f172a';
+            ctx.fillRect(cx + 28, cy + 34, 12, 10); // backrest
+            ctx.fillStyle = '#eab308'; // cushion
+            ctx.fillRect(cx + 24, cy + 29, 20, 5);
+
+            // Blue CPU case on side
+            ctx.fillStyle = '#1d4ed8';
+            ctx.fillRect(cx + 56, cy + 4, 10, 18);
+          });
         });
+      } else if (key === 'storage') {
+        // --- 창고 (Storage, Photo 1) ---
+        // Light purple/grey textured carpet
+        ctx.fillStyle = '#bcaeb7';
+        ctx.fillRect(r.x, r.y, r.w, r.h);
+        
+        // Draw carpet dot textures
+        ctx.fillStyle = '#a4969f';
+        for (let dx = r.x + 6; dx < r.x + r.w; dx += 12) {
+          for (let dy = r.y + 6; dy < r.y + r.h; dy += 12) {
+            ctx.fillRect(dx + (dy % 2 * 3), dy, 1.5, 1.5);
+          }
+        }
+
+        // Metal shelf unit (top left)
+        ctx.fillStyle = '#475569';
+        ctx.fillRect(r.x + 10, r.y + 10, 110, 35);
+        ctx.strokeStyle = '#1e293b'; ctx.lineWidth = 1.5;
+        ctx.strokeRect(r.x + 10, r.y + 10, 110, 35);
+        // Shelf dividers
+        ctx.beginPath();
+        ctx.moveTo(r.x + 65, r.y + 10); ctx.lineTo(r.x + 65, r.y + 45);
+        ctx.stroke();
+
+        // Items on metal shelf:
+        // Orange basketball
+        ctx.fillStyle = '#f97316';
+        ctx.beginPath(); ctx.arc(r.x + 85, r.y + 20, 8, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = '#000000'; ctx.lineWidth = 1; ctx.stroke();
+        // Brown box
+        ctx.fillStyle = '#b45309'; ctx.fillRect(r.x + 20, r.y + 20, 15, 15);
+        ctx.strokeRect(r.x + 20, r.y + 20, 15, 15);
+        // Red box
+        ctx.fillStyle = '#ef4444'; ctx.fillRect(r.x + 40, r.y + 25, 18, 12);
+        ctx.strokeRect(r.x + 40, r.y + 25, 18, 12);
+
+        // A-frame wooden ladder/shelf (top right)
+        ctx.strokeStyle = '#5c3a21'; ctx.lineWidth = 3;
+        ctx.beginPath(); // left side slanted leg
+        ctx.moveTo(r.x + 210, r.y + 15); ctx.lineTo(r.x + 200, r.y + 75);
+        // right side slanted leg
+        ctx.moveTo(r.x + 210, r.y + 15); ctx.lineTo(r.x + 225, r.y + 75);
+        ctx.stroke();
+        // horizontal boards
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(r.x + 205, r.y + 35); ctx.lineTo(r.x + 217, r.y + 35);
+        ctx.moveTo(r.x + 202, r.y + 55); ctx.lineTo(r.x + 221, r.y + 55);
+        ctx.stroke();
+
+        // Flower pot at base of ladder
+        ctx.fillStyle = '#ea580c'; // clay pot
+        ctx.fillRect(r.x + 195, r.y + 65, 8, 8);
+        ctx.fillStyle = '#10b981'; // green leaf
+        ctx.fillRect(r.x + 197, r.y + 61, 4, 4);
+
+        // Wooden bin/crate (middle left)
+        ctx.fillStyle = '#b45309';
+        ctx.fillRect(r.x + 15, r.y + 90, 65, 35);
+        ctx.strokeStyle = '#7c2d12'; ctx.lineWidth = 1.5;
+        ctx.strokeRect(r.x + 15, r.y + 90, 65, 35);
+        // Slats
+        for (let sx = r.x + 25; sx < r.x + 75; sx += 8) {
+          ctx.beginPath(); ctx.moveTo(sx, r.y + 90); ctx.lineTo(sx, r.y + 125); ctx.stroke();
+        }
+
+        // Small red/brown boxes scattered
+        ctx.fillStyle = '#ea580c'; ctx.fillRect(r.x + 90, r.y + 90, 16, 16);
+        ctx.strokeRect(r.x + 90, r.y + 90, 16, 16);
+        ctx.fillStyle = '#b45309'; ctx.fillRect(r.x + 120, r.y + 110, 20, 16);
+        ctx.strokeRect(r.x + 120, r.y + 110, 20, 16);
+
+        // Soccer ball on floor
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath(); ctx.arc(r.x + 30, r.y + 165, 9, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = '#000000'; ctx.lineWidth = 1; ctx.stroke();
+        // pentagons dots
+        ctx.fillStyle = '#000000';
+        ctx.fillRect(r.x + 28, r.y + 163, 3, 3);
+        ctx.fillRect(r.x + 23, r.y + 166, 2, 2);
+        ctx.fillRect(r.x + 34, r.y + 162, 2, 2);
+
+        // Golden keys on floor
+        ctx.strokeStyle = '#d97706'; ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.arc(r.x + 110, r.y + 160, 3, 0, Math.PI * 2); ctx.stroke(); // ring
+        ctx.beginPath(); ctx.moveTo(r.x + 113, r.y + 160); ctx.lineTo(r.x + 122, r.y + 160); ctx.stroke(); // shaft
+
+        // Stacked metal/wood chairs (bottom right)
+        ctx.fillStyle = '#8b4513';
+        ctx.fillRect(r.x + 190, r.y + 160, 30, 20); // seat
+        ctx.fillRect(r.x + 190, r.y + 210, 30, 20);
+        ctx.strokeStyle = '#94a3b8'; ctx.lineWidth = 2; // silver legs
+        ctx.strokeRect(r.x + 190, r.y + 160, 30, 20);
+        ctx.strokeRect(r.x + 190, r.y + 210, 30, 20);
+
+        // Broom leaning on right wall
+        ctx.strokeStyle = '#b45309'; ctx.lineWidth = 2; // handle
+        ctx.beginPath(); ctx.moveTo(r.x + r.w - 15, r.y + 90); ctx.lineTo(r.x + r.w - 30, r.y + 140); ctx.stroke();
+        ctx.fillStyle = '#2563eb'; // blue bristle
+        ctx.fillRect(r.x + r.w - 36, r.y + 138, 12, 10);
+
+        // Black trash bags (bottom left)
+        ctx.fillStyle = '#1e293b';
+        ctx.beginPath(); ctx.arc(r.x + 35, r.y + r.h - 35, 15, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(r.x + 55, r.y + r.h - 30, 12, 0, Math.PI * 2); ctx.fill();
+        // trash ties
+        ctx.fillStyle = '#475569';
+        ctx.fillRect(r.x + 32, r.y + r.h - 52, 6, 4);
+        ctx.fillRect(r.x + 52, r.y + r.h - 44, 5, 4);
       } else {
         // Hallway (default)
         ctx.fillStyle = '#f1f5f9';
