@@ -1738,6 +1738,9 @@
         const sx = 300 + ((i % 6) * 70) + Math.random() * 20;
         const sy = 150 + (Math.floor(i / 6) * 70) + Math.random() * 20;
 
+        // Assign a procedural styleId from 1 to 6
+        const styleId = ((i - 1) % 6) + 1;
+
         students[id] = {
           id: id,
           name: name,
@@ -1745,6 +1748,7 @@
           isMafia: isMafia,
           secretValue: isMafia ? 0 : 2,
           color: color,
+          styleId: styleId,
           x: sx,
           y: sy,
           room: 'auditorium',
@@ -2100,26 +2104,10 @@
       ctx.fillStyle = '#0c0d14';
       ctx.fillRect(0, 0, MAP_WIDTH, MAP_HEIGHT);
       
-      // 2. Render Room Areas & Inner Graph Grids
+      // 2. Render Room Interiors & Structures
       for (const key in ROOMS) {
         const r = ROOMS[key];
-        ctx.fillStyle = r.color;
-        ctx.fillRect(r.x, r.y, r.w, r.h);
-        
-        // Draw grid lines inside this room (graph paper style)
-        ctx.strokeStyle = '#e2e8f0';
-        ctx.lineWidth = 1;
-        for (let gx = Math.ceil(r.x / 40) * 40; gx < r.x + r.w; gx += 40) {
-          ctx.beginPath(); ctx.moveTo(gx, r.y); ctx.lineTo(gx, r.y + r.h); ctx.stroke();
-        }
-        for (let gy = Math.ceil(r.y / 40) * 40; gy < r.y + r.h; gy += 40) {
-          ctx.beginPath(); ctx.moveTo(r.x, gy); ctx.lineTo(r.x + r.w, gy); ctx.stroke();
-        }
-
-        // Draw double line border for walls (marker outline style)
-        ctx.strokeStyle = r.wallColor;
-        ctx.lineWidth = 4;
-        ctx.strokeRect(r.x, r.y, r.w, r.h);
+        drawRoomInterior(key, r);
         
         // Fill room title with handwriting marker font
         ctx.fillStyle = '#0f172a'; // Black marker ink
@@ -2134,9 +2122,9 @@
         ctx.textAlign = 'left';
       }
 
-      // 3. Clear Doorway lines in walls to represent openings (matches room floor color)
+      // 3. Clear Doorway lines in walls to represent openings (matches hallway floor color)
       ctx.lineWidth = 6;
-      ctx.strokeStyle = '#faf8f0'; 
+      ctx.strokeStyle = '#f1f5f9'; 
       
       for (const k in DOORS) {
         const d = DOORS[k];
@@ -2184,6 +2172,159 @@
 
       // 8. Draw Minimap separately
       drawMinimap();
+    }
+
+    function drawRoomInterior(key, r) {
+      if (key === 'class1' || key === 'class2') {
+        // Wood floor
+        ctx.fillStyle = '#dfd0bc';
+        ctx.fillRect(r.x, r.y, r.w, r.h);
+        
+        // Horizontal wooden boards
+        ctx.strokeStyle = '#cbd5e1';
+        ctx.lineWidth = 1;
+        for (let y = r.y + 12; y < r.y + r.h; y += 12) {
+          ctx.beginPath(); ctx.moveTo(r.x, y); ctx.lineTo(r.x + r.w, y); ctx.stroke();
+        }
+
+        // Top Wall decor (whiteboard, bookshelf, clock, bulletin board)
+        // Bulletin board (Green)
+        ctx.fillStyle = '#234731';
+        ctx.fillRect(r.x + 15, r.y + 4, 60, 14);
+        ctx.strokeStyle = '#5c3a21'; // Wood frame
+        ctx.lineWidth = 2;
+        ctx.strokeRect(r.x + 15, r.y + 4, 60, 14);
+        
+        // Small notes on bulletin board
+        ctx.fillStyle = '#ffea00'; ctx.fillRect(r.x + 20, r.y + 6, 4, 4);
+        ctx.fillStyle = '#ff3366'; ctx.fillRect(r.x + 35, r.y + 7, 4, 4);
+        ctx.fillStyle = '#00e5ff'; ctx.fillRect(r.x + 50, r.y + 6, 5, 5);
+
+        // Whiteboard (Center)
+        ctx.fillStyle = '#faf8f0';
+        ctx.fillRect(r.x + 85, r.y + 4, 130, 16);
+        ctx.strokeStyle = '#cbd5e1'; // Silver frame
+        ctx.strokeRect(r.x + 85, r.y + 4, 130, 16);
+        // Scribbles on whiteboard
+        ctx.fillStyle = '#ef4444';
+        ctx.font = '8px var(--font-retro)';
+        ctx.fillText('MATH', r.x + 100, r.y + 14);
+
+        // Bookshelf (Right)
+        ctx.fillStyle = '#8b5a2b';
+        ctx.fillRect(r.x + r.w - 65, r.y + 4, 50, 20);
+        ctx.strokeStyle = '#5c3a21';
+        ctx.strokeRect(r.x + r.w - 65, r.y + 4, 50, 20);
+        // Books
+        for (let bx = r.x + r.w - 62; bx < r.x + r.w - 18; bx += 4) {
+          ctx.fillStyle = bx % 3 === 0 ? '#ef4444' : (bx % 3 === 1 ? '#3b82f6' : '#10b981');
+          ctx.fillRect(bx, r.y + 6, 2, 14);
+        }
+
+        // Clock
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath(); ctx.arc(r.x + r.w - 80, r.y + 12, 6, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = '#000000'; ctx.lineWidth = 1; ctx.stroke();
+        
+        // Teacher's Desk
+        ctx.fillStyle = '#8b4513';
+        ctx.fillRect(r.x + 40, r.y + 50, 45, 25);
+        ctx.strokeStyle = '#5c3a21';
+        ctx.strokeRect(r.x + 40, r.y + 50, 45, 25);
+        // Laptop screen
+        ctx.fillStyle = '#64748b';
+        ctx.fillRect(r.x + 50, r.y + 54, 18, 10);
+        ctx.fillStyle = '#00e5ff';
+        ctx.fillRect(r.x + 52, r.y + 56, 14, 6);
+
+        // Row of student lockers/chairs at the bottom (matching photos 4 and 5)
+        const lockerColors = ['#f97316', '#22c55e', '#3b82f6'];
+        for (let i = 0; i < 6; i++) {
+          const lx = r.x + 20 + i * 45;
+          ctx.fillStyle = lockerColors[i % 3];
+          ctx.fillRect(lx, r.y + r.h - 22, 35, 18);
+          // top wooden seat/lid
+          ctx.fillStyle = '#8b4513';
+          ctx.fillRect(lx, r.y + r.h - 26, 35, 4);
+        }
+      } else if (key === 'auditorium') {
+        // Large auditorium floor (wooden)
+        ctx.fillStyle = '#ebdcb9';
+        ctx.fillRect(r.x, r.y, r.w, r.h);
+        
+        // Grid board lines
+        ctx.strokeStyle = '#d2c1aa';
+        ctx.lineWidth = 1;
+        for (let gx = r.x + 40; gx < r.x + r.w; gx += 40) {
+          ctx.beginPath(); ctx.moveTo(gx, r.y); ctx.lineTo(gx, r.y + r.h); ctx.stroke();
+        }
+        for (let gy = r.y + 40; gy < r.y + r.h; gy += 40) {
+          ctx.beginPath(); ctx.moveTo(r.x, gy); ctx.lineTo(r.x + r.w, gy); ctx.stroke();
+        }
+
+        // Podium stage at top center
+        ctx.fillStyle = '#8b4513';
+        ctx.fillRect(r.x + r.w / 2 - 50, r.y + 20, 100, 30);
+        ctx.strokeStyle = '#5c3a21';
+        ctx.strokeRect(r.x + r.w / 2 - 50, r.y + 20, 100, 30);
+        ctx.fillStyle = '#faf8f0';
+        ctx.font = '10px var(--font-retro)';
+        ctx.fillText('STAGE', r.x + r.w / 2 - 15, r.y + 38);
+      } else if (key === 'toilet') {
+        // Tile Floor
+        ctx.fillStyle = '#cbd5e1';
+        ctx.fillRect(r.x, r.y, r.w, r.h);
+        ctx.strokeStyle = '#94a3b8';
+        ctx.lineWidth = 1.5;
+        for (let gx = r.x + 30; gx < r.x + r.w; gx += 30) {
+          ctx.beginPath(); ctx.moveTo(gx, r.y); ctx.lineTo(gx, r.y + r.h); ctx.stroke();
+        }
+        for (let gy = r.y + 30; gy < r.y + r.h; gy += 30) {
+          ctx.beginPath(); ctx.moveTo(r.x, gy); ctx.lineTo(r.x + r.w, gy); ctx.stroke();
+        }
+        // Draw sinks
+        ctx.fillStyle = '#ffffff';
+        for (let i = 0; i < 3; i++) {
+          ctx.beginPath(); ctx.arc(r.x + 40 + i * 50, r.y + 15, 8, 0, Math.PI * 2); ctx.fill();
+          ctx.strokeStyle = '#475569'; ctx.stroke();
+        }
+      } else if (key === 'storage') {
+        // Concrete floor
+        ctx.fillStyle = '#a1a1aa';
+        ctx.fillRect(r.x, r.y, r.w, r.h);
+        // Draw wooden boxes
+        ctx.fillStyle = '#d97706';
+        ctx.strokeStyle = '#7c2d12';
+        ctx.lineWidth = 2;
+        const boxes = [
+          {x: r.x + 30, y: r.y + 30}, {x: r.x + 180, y: r.y + 40},
+          {x: r.x + 60, y: r.y + 180}, {x: r.x + 200, y: r.y + 200}
+        ];
+        boxes.forEach(b => {
+          ctx.fillRect(b.x, b.y, 40, 40);
+          ctx.strokeRect(b.x, b.y, 40, 40);
+          // Draw 'X' inside
+          ctx.beginPath();
+          ctx.moveTo(b.x, b.y); ctx.lineTo(b.x + 40, b.y + 40);
+          ctx.moveTo(b.x + 40, b.y); ctx.lineTo(b.x, b.y + 40);
+          ctx.stroke();
+        });
+      } else {
+        // Hallway (default)
+        ctx.fillStyle = '#f1f5f9';
+        ctx.fillRect(r.x, r.y, r.w, r.h);
+        // Vertical lines for tile panels
+        ctx.strokeStyle = '#cbd5e1';
+        ctx.lineWidth = 1;
+        for (let gx = r.x + 30; gx < r.x + r.w; gx += 30) {
+          ctx.beginPath(); ctx.moveTo(gx, r.y); ctx.lineTo(gx, r.y + r.h); ctx.stroke();
+        }
+      }
+
+      // Draw Wall outlines
+      ctx.strokeStyle = r.wallColor;
+      ctx.lineWidth = 4;
+      ctx.strokeRect(r.x, r.y, r.w, r.h);
     }
 
     function drawComputationDesk() {
@@ -2247,43 +2388,209 @@
         ctx.stroke();
       }
 
-      // 2. Character body
-      ctx.fillStyle = s.color;
-      ctx.beginPath();
-      ctx.arc(s.x, s.y, s.radius, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.strokeStyle = '#000';
-      ctx.lineWidth = 2;
-      ctx.stroke();
+      // Draw character body & features procedurally based on styleId
+      const styleId = s.styleId || 1;
+      
+      // Define hair and uniform colors based on styleId
+      let hairColor = '#3d2314';
+      let skinColor = '#ffdbac';
+      let blazerColor = '#2b4c7e';
+      let bottomColor = '#4b5563'; // Skirt/Pants
+      let tieColor = '#ef4444';
+      let hasSkirt = true;
 
-      // 3. Head & Hair details
-      ctx.fillStyle = '#ffdbac'; // Skin tone
-      ctx.beginPath();
-      ctx.arc(s.x, s.y - 4, s.radius * 0.75, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.stroke();
+      if (styleId === 1) { // Braids Girl (양갈래)
+        hairColor = '#2d1810';
+        blazerColor = '#2b4c7e';
+        bottomColor = '#4b5563';
+        hasSkirt = true;
+      } else if (styleId === 2) { // Blonde Headband Girl (금발 머리띠)
+        hairColor = '#eab308';
+        blazerColor = '#2b4c7e';
+        bottomColor = '#4b5563';
+        hasSkirt = true;
+      } else if (styleId === 3) { // Ponytail/Bun Girl (똥머리)
+        hairColor = '#1e293b';
+        blazerColor = '#78350f';
+        bottomColor = '#451a03';
+        hasSkirt = true;
+      } else if (styleId === 4) { // Classic Boy (단정 남학생)
+        hairColor = '#111827';
+        blazerColor = '#2b4c7e';
+        bottomColor = '#374151';
+        hasSkirt = false;
+      } else if (styleId === 5) { // Short Grey Hair Girl (단발 여학생)
+        hairColor = '#4b5563';
+        blazerColor = '#bae6fd'; // Light blue shirt style
+        bottomColor = '#334155';
+        hasSkirt = true;
+      } else if (styleId === 6) { // Orange Hair Boy (갈색 남학생)
+        hairColor = '#b45309';
+        blazerColor = '#78350f';
+        bottomColor = '#451a03';
+        hasSkirt = false;
+      }
 
-      // Face direction features
-      ctx.fillStyle = '#000';
-      if (s.direction === 'left') {
-        ctx.fillRect(s.x - 7, s.y - 6, 2, 3); // Left eye
-        // Hair back
-        ctx.fillStyle = '#222';
-        ctx.fillRect(s.x + 3, s.y - 12, 6, 12);
-      } else if (s.direction === 'right') {
-        ctx.fillRect(s.x + 5, s.y - 6, 2, 3); // Right eye
-        // Hair back
-        ctx.fillStyle = '#222';
-        ctx.fillRect(s.x - 9, s.y - 12, 6, 12);
-      } else if (s.direction === 'up') {
-        // Back of head (all hair)
-        ctx.fillStyle = '#222';
+      // Draw legs & shoes
+      ctx.strokeStyle = '#000000';
+      ctx.lineWidth = 1.5;
+      
+      ctx.fillStyle = skinColor;
+      ctx.fillRect(s.x - 4, s.y + 8, 2, 7);
+      ctx.fillRect(s.x + 2, s.y + 8, 2, 7);
+      ctx.strokeRect(s.x - 4, s.y + 8, 2, 7);
+      ctx.strokeRect(s.x + 2, s.y + 8, 2, 7);
+      
+      ctx.fillStyle = '#1e293b'; // Black shoes
+      ctx.fillRect(s.x - 5, s.y + 14, 3, 3);
+      ctx.fillRect(s.x + 2, s.y + 14, 3, 3);
+      ctx.strokeRect(s.x - 5, s.y + 14, 3, 3);
+      ctx.strokeRect(s.x + 2, s.y + 14, 3, 3);
+
+      // Draw bottom (skirt or pants)
+      ctx.fillStyle = bottomColor;
+      if (hasSkirt) {
+        // Skirt shape (flared)
         ctx.beginPath();
-        ctx.arc(s.x, s.y - 5, s.radius * 0.75, Math.PI, 0);
+        ctx.moveTo(s.x - 7, s.y + 4);
+        ctx.lineTo(s.x + 7, s.y + 4);
+        ctx.lineTo(s.x + 9, s.y + 10);
+        ctx.lineTo(s.x - 9, s.y + 10);
+        ctx.closePath();
         ctx.fill();
+        ctx.stroke();
+      } else {
+        // Pants
+        ctx.fillRect(s.x - 6, s.y + 4, 12, 6);
+        ctx.strokeRect(s.x - 6, s.y + 4, 12, 6);
+        // Separation line
+        ctx.strokeStyle = '#000000';
+        ctx.beginPath();
+        ctx.moveTo(s.x, s.y + 4);
+        ctx.lineTo(s.x, s.y + 10);
+        ctx.stroke();
+      }
+
+      // Draw torso (blazer / shirt)
+      ctx.fillStyle = blazerColor;
+      ctx.fillRect(s.x - 7, s.y - 4, 14, 9);
+      ctx.strokeRect(s.x - 7, s.y - 4, 14, 9);
+      
+      // White collar
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.moveTo(s.x - 3, s.y - 4);
+      ctx.lineTo(s.x + 3, s.y - 4);
+      ctx.lineTo(s.x, s.y - 1);
+      ctx.closePath();
+      ctx.fill();
+
+      // Tie / Ribbon
+      ctx.fillStyle = tieColor;
+      ctx.fillRect(s.x - 1, s.y - 3, 2, 4);
+
+      // Draw arms (side rectangles)
+      ctx.fillStyle = blazerColor;
+      ctx.fillRect(s.x - 9, s.y - 4, 2, 8);
+      ctx.strokeRect(s.x - 9, s.y - 4, 2, 8);
+      ctx.fillRect(s.x + 7, s.y - 4, 2, 8);
+      ctx.strokeRect(s.x + 7, s.y - 4, 2, 8);
+      // Skin hands
+      ctx.fillStyle = skinColor;
+      ctx.fillRect(s.x - 9, s.y + 4, 2, 2);
+      ctx.fillRect(s.x + 7, s.y + 4, 2, 2);
+
+      // Head (Skin tone)
+      ctx.fillStyle = skinColor;
+      ctx.beginPath();
+      ctx.arc(s.x, s.y - 10, 7, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#000000';
+      ctx.stroke();
+
+      // Face features based on direction
+      ctx.fillStyle = '#000000';
+      if (s.direction === 'left') {
+        ctx.fillRect(s.x - 5, s.y - 11, 2, 2); // Eye
+        // Hair (side profile)
+        ctx.fillStyle = hairColor;
+        ctx.fillRect(s.x - 1, s.y - 17, 6, 12); 
+        ctx.strokeRect(s.x - 1, s.y - 17, 6, 12); 
+        ctx.fillRect(s.x - 4, s.y - 17, 5, 4);  // Top bangs
+      } else if (s.direction === 'right') {
+        ctx.fillRect(s.x + 3, s.y - 11, 2, 2); // Eye
+        // Hair (side profile)
+        ctx.fillStyle = hairColor;
+        ctx.fillRect(s.x - 5, s.y - 17, 6, 12); 
+        ctx.strokeRect(s.x - 5, s.y - 17, 6, 12); 
+        ctx.fillRect(s.x - 1, s.y - 17, 5, 4);  // Top bangs
+      } else if (s.direction === 'up') {
+        // Back of head has no face features, just hair covering face
+        ctx.fillStyle = hairColor;
+        ctx.beginPath();
+        ctx.arc(s.x, s.y - 10, 7.5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
       } else { // Down (facing player)
-        ctx.fillRect(s.x - 3, s.y - 6, 2, 3); // Left eye
-        ctx.fillRect(s.x + 2, s.y - 6, 2, 3); // Right eye
+        // Eyes
+        ctx.fillRect(s.x - 3, s.y - 11, 2, 2);
+        ctx.fillRect(s.x + 1, s.y - 11, 2, 2);
+        
+        // Hair bangs on front
+        ctx.fillStyle = hairColor;
+        ctx.fillRect(s.x - 8, s.y - 17, 16, 5); // top scalp
+        ctx.strokeRect(s.x - 8, s.y - 17, 16, 5);
+        ctx.fillRect(s.x - 8, s.y - 13, 2, 5);  // side locks
+        ctx.fillRect(s.x + 6, s.y - 13, 2, 5);
+      }
+
+      // Draw specific hair extras depending on style
+      ctx.fillStyle = hairColor;
+      ctx.strokeStyle = '#000000';
+      ctx.lineWidth = 1.5;
+      
+      if (s.direction !== 'up') {
+        if (styleId === 1) { // Braids
+          // Draw two braids hanging down on sides
+          ctx.beginPath(); ctx.arc(s.x - 8, s.y - 4, 3, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+          ctx.beginPath(); ctx.arc(s.x + 8, s.y - 4, 3, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        } else if (styleId === 2) { // Blonde Headband
+          // Draw white headband
+          ctx.strokeStyle = '#ffffff';
+          ctx.lineWidth = 2.5;
+          ctx.beginPath();
+          ctx.arc(s.x, s.y - 10, 8, Math.PI * 1.1, Math.PI * 1.9);
+          ctx.stroke();
+          
+          // Long side hair
+          ctx.fillStyle = hairColor;
+          ctx.fillRect(s.x - 8, s.y - 12, 2, 12);
+          ctx.fillRect(s.x + 6, s.y - 12, 2, 12);
+        } else if (styleId === 3) { // Bun
+          // High bun
+          ctx.beginPath(); ctx.arc(s.x, s.y - 18, 4, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+          // Bun band (white)
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(s.x - 3, s.y - 15, 6, 2);
+        } else if (styleId === 5) { // Short Bob
+          // Side locks wrapping face
+          ctx.fillRect(s.x - 8, s.y - 13, 2, 8);
+          ctx.fillRect(s.x + 6, s.y - 13, 2, 8);
+        }
+      } else {
+        // Back-view hair extras
+        if (styleId === 1) { // Braids from back
+          ctx.beginPath(); ctx.arc(s.x - 8, s.y - 4, 3.5, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+          ctx.beginPath(); ctx.arc(s.x + 8, s.y - 4, 3.5, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        } else if (styleId === 2) { // Long blonde hair from back
+          ctx.fillRect(s.x - 8, s.y - 12, 16, 16);
+          ctx.strokeRect(s.x - 8, s.y - 12, 16, 16);
+        } else if (styleId === 3) { // Bun from back
+          ctx.beginPath(); ctx.arc(s.x, s.y - 18, 4, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        } else if (styleId === 5) { // Short bob covering back of neck
+          ctx.fillRect(s.x - 8, s.y - 12, 16, 10);
+          ctx.strokeRect(s.x - 8, s.y - 12, 16, 10);
+        }
       }
 
       // Name banner above head (outlined for maximum legibility on light floors)
