@@ -1052,6 +1052,35 @@
       text-align: center;
       box-shadow: 0 4px 8px rgba(0,0,0,0.4);
     }
+
+    /* Ready Button Styling */
+    .ready-action-btn {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 12px 36px;
+      font-size: 1.5rem;
+      font-weight: bold;
+      font-family: DungGeunMo, cursive;
+      background-color: var(--chalk-yellow);
+      color: #0f172a;
+      border: 3px solid var(--wood-border);
+      border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+      cursor: pointer;
+      z-index: 1000;
+      transition: all 0.2s ease;
+    }
+    .ready-action-btn:hover {
+      background-color: #facc15;
+      transform: translateX(-50%) scale(1.05);
+    }
+    .ready-action-btn.ready-active {
+      background-color: #ef4444;
+      color: #ffffff;
+      border-color: #991b1b;
+    }
   </style>
 </head>
 <body>
@@ -1118,6 +1147,7 @@
       <div class="canvas-wrapper">
         <div class="room-overlay-banner" id="room-banner">현재 공간: 강당</div>
         <canvas id="game-canvas" width="780" height="550"></canvas>
+        <button id="ready-btn" class="ready-action-btn" onclick="toggleReadyState()" style="display: none;">준비</button>
         
         <!-- One-time Secret Reveal Popup (Student only) -->
         <div id="secret-reveal" class="secret-popup-overlay" style="display: none;">
@@ -1180,6 +1210,7 @@
             <button class="cctv-btn" id="cctv-hallway" onclick="setCCTV('hallway')">복도</button>
             <button class="cctv-btn" id="cctv-toilet" onclick="setCCTV('toilet')">컴퓨터실</button>
             <button class="cctv-btn" id="cctv-storage" onclick="setCCTV('storage')">창고</button>
+            <button class="cctv-btn" id="cctv-desk" onclick="setCCTV('desk')">연산대</button>
           </div>
           
           <button class="multiply-btn" id="multiply-action-btn" onclick="triggerMultiply()">곱셈연산 발동</button>
@@ -1326,19 +1357,23 @@
 
     const ROOMS = {
       auditorium: { name: '강당', color: '#faf8f0', x: 200, y: 50, w: 600, h: 600, wallColor: '#475569' },
-      class1: { name: '교실 1', color: '#faf8f0', x: 50, y: 700, w: 300, h: 300, wallColor: '#475569' },
-      class2: { name: '교실 2', color: '#faf8f0', x: 650, y: 700, w: 300, h: 300, wallColor: '#475569' },
-      toilet: { name: '컴퓨터실', color: '#faf8f0', x: 50, y: 1100, w: 300, h: 300, wallColor: '#475569' },
-      storage: { name: '창고', color: '#faf8f0', x: 650, y: 1100, w: 300, h: 300, wallColor: '#475569' },
+      class1: { name: '교실 1', color: '#faf8f0', x: 0, y: 700, w: 300, h: 300, wallColor: '#475569' },
+      class2: { name: '교실 2', color: '#faf8f0', x: 700, y: 700, w: 300, h: 300, wallColor: '#475569' },
+      toilet: { name: '컴퓨터실', color: '#faf8f0', x: 0, y: 1100, w: 300, h: 300, wallColor: '#475569' },
+      storage: { name: '창고', color: '#faf8f0', x: 700, y: 1100, w: 300, h: 300, wallColor: '#475569' },
       hallway: { name: '복도', color: '#faf8f0', x: 350, y: 650, w: 300, h: 1100, wallColor: '#475569' }
     };
 
     const DOORS = {
       auditorium: { x1: 450, x2: 550, y: 650, orientation: 'h' },
-      class1: { x: 350, y1: 820, y2: 880, orientation: 'v' },
-      class2: { x: 650, y1: 820, y2: 880, orientation: 'v' },
-      toilet: { x: 350, y1: 1220, y2: 1280, orientation: 'v' },
-      storage: { x: 650, y1: 1220, y2: 1280, orientation: 'v' }
+      class1_inner: { x: 300, y1: 820, y2: 880, orientation: 'v' },
+      class1_outer: { x: 350, y1: 820, y2: 880, orientation: 'v' },
+      class2_inner: { x: 700, y1: 820, y2: 880, orientation: 'v' },
+      class2_outer: { x: 650, y1: 820, y2: 880, orientation: 'v' },
+      toilet_inner: { x: 300, y1: 1220, y2: 1280, orientation: 'v' },
+      toilet_outer: { x: 350, y1: 1220, y2: 1280, orientation: 'v' },
+      storage_inner: { x: 700, y1: 1220, y2: 1280, orientation: 'v' },
+      storage_outer: { x: 650, y1: 1220, y2: 1280, orientation: 'v' }
     };
 
     const DESK_X = 500;
@@ -1473,6 +1508,19 @@
 
     // --- 5. Collision Detection & Room Constraining Physics ---
     function moveAndCollide(student, dx, dy) {
+      if (student.isReady) {
+        // Enforce seat lock coordinates
+        const distL = Math.hypot(student.x - LEFT_SEAT_X, student.y - LEFT_SEAT_Y);
+        const distR = Math.hypot(student.x - RIGHT_SEAT_X, student.y - RIGHT_SEAT_Y);
+        if (distL < distR) {
+          student.x = LEFT_SEAT_X;
+          student.y = LEFT_SEAT_Y;
+        } else {
+          student.x = RIGHT_SEAT_X;
+          student.y = RIGHT_SEAT_Y;
+        }
+        return;
+      }
       if (dx === 0 && dy === 0) return;
       
       let nx = student.x + dx;
@@ -1512,9 +1560,9 @@
         let minY = bounds.y + r;
         let maxY = bounds.y + bounds.h - r;
 
-        // Doorway transition: Right side door (X: 350, Y: 820~880)
+        // Doorway transition: Right side door (X: 300, Y: 820~880)
         if (ny >= 820 + r && ny <= 880 - r && nx > maxX) {
-          if (nx >= 350) {
+          if (nx >= 300) {
             student.room = 'hallway';
           }
         } else {
@@ -1529,9 +1577,9 @@
         let minY = bounds.y + r;
         let maxY = bounds.y + bounds.h - r;
 
-        // Doorway transition: Left side door (X: 650, Y: 820~880)
+        // Doorway transition: Left side door (X: 700, Y: 820~880)
         if (ny >= 820 + r && ny <= 880 - r && nx < minX) {
-          if (nx <= 650) {
+          if (nx <= 700) {
             student.room = 'hallway';
           }
         } else {
@@ -1546,9 +1594,9 @@
         let minY = bounds.y + r;
         let maxY = bounds.y + bounds.h - r;
 
-        // Doorway transition: Right side door (X: 350, Y: 1220~1280)
+        // Doorway transition: Right side door (X: 300, Y: 1220~1280)
         if (ny >= 1220 + r && ny <= 1280 - r && nx > maxX) {
-          if (nx >= 350) {
+          if (nx >= 300) {
             student.room = 'hallway';
           }
         } else {
@@ -1563,9 +1611,9 @@
         let minY = bounds.y + r;
         let maxY = bounds.y + bounds.h - r;
 
-        // Doorway transition: Left side door (X: 650, Y: 1220~1280)
+        // Doorway transition: Left side door (X: 700, Y: 1220~1280)
         if (ny >= 1220 + r && ny <= 1280 - r && nx < minX) {
-          if (nx <= 650) {
+          if (nx <= 700) {
             student.room = 'hallway';
           }
         } else {
@@ -1580,40 +1628,41 @@
         let minY = bounds.y + r;
         let maxY = bounds.y + bounds.h - r;
 
+        // Dynamic horizontal boundaries to allow moving into corridor branches
+        if (ny >= 820 + r && ny <= 880 - r) {
+          minX = 300 + r;
+          maxX = 700 - r;
+        } else if (ny >= 1220 + r && ny <= 1280 - r) {
+          minX = 300 + r;
+          maxX = 700 - r;
+        }
+
+        // Clamp positions
+        nx = Math.max(minX, Math.min(maxX, nx));
+        ny = Math.max(minY, Math.min(maxY, ny));
+
         // Door check 1: Auditorium entry (Y: 650, X: 450~550)
         if (nx >= 450 + r && nx <= 550 - r && ny < minY) {
           if (ny <= 650) {
             student.room = 'auditorium';
           }
         } 
-        // Door check 2: Classroom 1 entry (X: 350, Y: 820~880)
-        else if (ny >= 820 + r && ny <= 880 - r && nx < minX) {
-          if (nx <= 350) {
-            student.room = 'class1';
-          }
+        // Door check 2: Classroom 1 entry (X: 300, Y: 820~880)
+        else if (ny >= 820 + r && ny <= 880 - r && nx < 300) {
+          student.room = 'class1';
         } 
-        // Door check 3: Classroom 2 entry (X: 650, Y: 820~880)
-        else if (ny >= 820 + r && ny <= 880 - r && nx > maxX) {
-          if (nx >= 650) {
-            student.room = 'class2';
-          }
+        // Door check 3: Classroom 2 entry (X: 700, Y: 820~880)
+        else if (ny >= 820 + r && ny <= 880 - r && nx > 700) {
+          student.room = 'class2';
         } 
-        // Door check 4: Restroom entry (X: 350, Y: 1220~1280)
-        else if (ny >= 1220 + r && ny <= 1280 - r && nx < minX) {
-          if (nx <= 350) {
-            student.room = 'toilet';
-          }
+        // Door check 4: Restroom entry (X: 300, Y: 1220~1280)
+        else if (ny >= 1220 + r && ny <= 1280 - r && nx < 300) {
+          student.room = 'toilet';
         } 
-        // Door check 5: Storage entry (X: 650, Y: 1220~1280)
-        else if (ny >= 1220 + r && ny <= 1280 - r && nx > maxX) {
-          if (nx >= 650) {
-            student.room = 'storage';
-          }
+        // Door check 5: Storage entry (X: 700, Y: 1220~1280)
+        else if (ny >= 1220 + r && ny <= 1280 - r && nx > 700) {
+          student.room = 'storage';
         } 
-        else {
-          nx = Math.max(minX, Math.min(maxX, nx));
-          ny = Math.max(minY, Math.min(maxY, ny));
-        }
       }
 
       student.x = nx;
@@ -1847,6 +1896,163 @@
       }, 800);
     }
 
+    function triggerBubbleChat(userId, text) {
+      const s = students[userId];
+      if (!s) return;
+
+      s.chatBubble = text;
+      s.chatBubbleTimer = 180; // 3 seconds at 60 FPS
+
+      // Save to spatial chat log archive
+      const room = s.room;
+      if (chatArchives[room]) {
+        chatArchives[room].push({
+          name: s.name,
+          msg: text,
+          time: new Date().toLocaleTimeString('ko-KR', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' })
+        });
+        
+        // Keep log size clean
+        if (chatArchives[room].length > 40) {
+          chatArchives[room].shift();
+        }
+      }
+      
+      // Update UI chat display if viewing matching room
+      refreshChatDisplay();
+    }
+
+    function refreshChatDisplay() {
+      if (isAdmin) return; // Admin has chat completely locked out
+      
+      const me = students[currentControlledId];
+      if (!me) return;
+      
+      const currentRoom = me.room;
+      const chatLogBox = document.getElementById('room-chat-log');
+      const chatTitle = document.getElementById('chat-title');
+      
+      const roomName = ROOMS[currentRoom].name;
+      chatTitle.textContent = `현재 공간 대화 로그 (${roomName})`;
+      
+      chatLogBox.innerHTML = '';
+      const archive = chatArchives[currentRoom] || [];
+      archive.forEach(item => {
+        const row = document.createElement('div');
+        row.className = 'chat-msg-row';
+        row.innerHTML = `<span class="chat-system">[${item.time}]</span> <span class="chat-name">${item.name}</span>: ${item.msg}`;
+        chatLogBox.appendChild(row);
+      });
+      chatLogBox.scrollTop = chatLogBox.scrollHeight;
+    }
+
+    // --- 11.5. Participant Ready State Handlers ---
+    function toggleReadyState() {
+      const player = students[currentControlledId];
+      if (!player) return;
+      
+      playSound('click');
+      
+      const distL = Math.hypot(player.x - LEFT_SEAT_X, player.y - LEFT_SEAT_Y);
+      const distR = Math.hypot(player.x - RIGHT_SEAT_X, player.y - RIGHT_SEAT_Y);
+      
+      const isOnLeft = distL < 15;
+      const isOnRight = distR < 15;
+      
+      if (!isOnLeft && !isOnRight) return;
+      
+      const targetSeatX = isOnLeft ? LEFT_SEAT_X : RIGHT_SEAT_X;
+      const targetSeatY = isOnLeft ? LEFT_SEAT_Y : RIGHT_SEAT_Y;
+      
+      player.isReady = !player.isReady;
+      
+      if (player.isReady) {
+        // Enforce lock coordinates
+        player.x = targetSeatX;
+        player.y = targetSeatY;
+        player.direction = isOnLeft ? 'right' : 'left';
+        
+        // Release anyone else ready on this seat
+        for (const id in students) {
+          if (id !== currentControlledId && students[id].isReady) {
+            const sDist = Math.hypot(students[id].x - targetSeatX, students[id].y - targetSeatY);
+            if (sDist < 5) {
+              students[id].isReady = false;
+              if (isFirebaseConnected) {
+                fbRoomRef.child('users').child(id).update({ isReady: false });
+              }
+            }
+          }
+        }
+      }
+      
+      if (isFirebaseConnected) {
+        fbRoomRef.child('users').child(player.id).update({
+          isReady: player.isReady,
+          x: player.x,
+          y: player.y,
+          direction: player.direction
+        });
+      }
+    }
+
+    function updateReadyButtonVisibility() {
+      if (isAdmin) {
+        document.getElementById('ready-btn').style.display = 'none';
+        return;
+      }
+      const player = students[currentControlledId];
+      if (!player) {
+        document.getElementById('ready-btn').style.display = 'none';
+        return;
+      }
+      
+      const distL = Math.hypot(player.x - LEFT_SEAT_X, player.y - LEFT_SEAT_Y);
+      const distR = Math.hypot(player.x - RIGHT_SEAT_X, player.y - RIGHT_SEAT_Y);
+      
+      const isOnLeft = distL < 15;
+      const isOnRight = distR < 15;
+      
+      const btn = document.getElementById('ready-btn');
+      if (isOnLeft || isOnRight) {
+        btn.style.display = 'block';
+        if (player.isReady) {
+          btn.textContent = '준비 해제';
+          btn.classList.add('ready-active');
+        } else {
+          // If seat is occupied by another READY character, hide ready option
+          const targetSeatX = isOnLeft ? LEFT_SEAT_X : RIGHT_SEAT_X;
+          const targetSeatY = isOnLeft ? LEFT_SEAT_Y : RIGHT_SEAT_Y;
+          let isSeatOccupiedByOtherReady = false;
+          for (const id in students) {
+            if (id !== currentControlledId && students[id].isReady) {
+              const sDist = Math.hypot(students[id].x - targetSeatX, students[id].y - targetSeatY);
+              if (sDist < 5) {
+                isSeatOccupiedByOtherReady = true;
+                break;
+              }
+            }
+          }
+          
+          if (isSeatOccupiedByOtherReady) {
+            btn.style.display = 'none';
+          } else {
+            btn.textContent = '준비';
+            btn.classList.remove('ready-active');
+          }
+        }
+      } else {
+        // Cancel ready if they somehow move away (e.g. forced teleport)
+        if (player.isReady) {
+          player.isReady = false;
+          if (isFirebaseConnected) {
+            fbRoomRef.child('users').child(player.id).update({ isReady: false });
+          }
+        }
+        btn.style.display = 'none';
+      }
+    }
+
     // --- 10. Event Keyboard Handlers ---
     function handleKeyDown(e) {
       if (e.key === 'Tab') {
@@ -1900,39 +2106,6 @@
 
     function triggerBubbleChat(userId, text) {
       const s = students[userId];
-      if (!s) return;
-
-      s.chatBubble = text;
-      s.chatBubbleTimer = 180; // 3 seconds at 60 FPS
-
-      // Save to spatial chat log archive
-      const room = s.room;
-      if (chatArchives[room]) {
-        chatArchives[room].push({
-          name: s.name,
-          msg: text,
-          time: new Date().toLocaleTimeString('ko-KR', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' })
-        });
-        
-        // Keep log size clean
-        if (chatArchives[room].length > 40) {
-          chatArchives[room].shift();
-        }
-      }
-      
-      // Update UI chat display if viewing matching room
-      refreshChatDisplay();
-    }
-
-    function refreshChatDisplay() {
-      if (isAdmin) return; // Admin has chat completely locked out
-      
-      const me = students[currentControlledId];
-      if (!me) return;
-      
-      const currentRoom = me.room;
-      const chatLogBox = document.getElementById('room-chat-log');
-      const chatTitle = document.getElementById('chat-title');
       
       const roomName = ROOMS[currentRoom].name;
       chatTitle.textContent = `현재 공간 대화 로그 (${roomName})`;
@@ -1964,7 +2137,11 @@
       cctvFollowPlayer = false; // Turn off follow in spectator mode
 
       // Banner update
-      document.getElementById('room-banner').textContent = `현재 공간: ${ROOMS[room].name} (CCTV 관전 중)`;
+      if (room === 'desk') {
+        document.getElementById('room-banner').textContent = `현재 공간: 연산대 책상 (CCTV 관전 중)`;
+      } else {
+        document.getElementById('room-banner').textContent = `현재 공간: ${ROOMS[room].name} (CCTV 관전 중)`;
+      }
     }
 
     // --- 13. Game Loops and Canvas Renderings ---
@@ -2030,10 +2207,18 @@
         
         document.getElementById('room-banner').textContent = `현재 공간: ${ROOMS[player.room].name}`;
       } else {
-        // Focus on active CCTV room center
-        const r = ROOMS[activeCCTV];
-        const targetX = r.x + r.w / 2 - VIEWPORT_WIDTH / 2;
-        const targetY = r.y + r.h / 2 - VIEWPORT_HEIGHT / 2;
+        let targetX = 0;
+        let targetY = 0;
+        
+        if (activeCCTV === 'desk') {
+          targetX = DESK_X - VIEWPORT_WIDTH / 2;
+          targetY = DESK_Y - VIEWPORT_HEIGHT / 2;
+        } else {
+          // Focus on active CCTV room center
+          const r = ROOMS[activeCCTV];
+          targetX = r.x + r.w / 2 - VIEWPORT_WIDTH / 2;
+          targetY = r.y + r.h / 2 - VIEWPORT_HEIGHT / 2;
+        }
         
         // Smooth slide camera or snap
         camera.x = targetX;
@@ -2053,6 +2238,9 @@
           document.getElementById('multiply-popup').style.display = 'none';
         }
       }
+
+      // 6. Update Ready button visibility
+      updateReadyButtonVisibility();
     }
 
     function checkMultiplyDeskCondition() {
@@ -2555,12 +2743,39 @@
         // Hallway (default)
         ctx.fillStyle = '#f1f5f9';
         ctx.fillRect(r.x, r.y, r.w, r.h);
+        
+        // 4 Horizontal connecting corridor branches (floor)
+        ctx.fillRect(300, 820, 50, 60);
+        ctx.fillRect(650, 820, 50, 60);
+        ctx.fillRect(300, 1220, 50, 60);
+        ctx.fillRect(650, 1220, 50, 60);
+
         // Vertical lines for tile panels
         ctx.strokeStyle = '#cbd5e1';
         ctx.lineWidth = 1;
         for (let gx = r.x + 30; gx < r.x + r.w; gx += 30) {
           ctx.beginPath(); ctx.moveTo(gx, r.y); ctx.lineTo(gx, r.y + r.h); ctx.stroke();
         }
+
+        // Draw horizontal wall lines on top/bottom of the branches
+        ctx.strokeStyle = r.wallColor;
+        ctx.lineWidth = 4;
+        
+        // Branch 1 (class1 branch)
+        ctx.beginPath(); ctx.moveTo(300, 820); ctx.lineTo(350, 820); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(300, 880); ctx.lineTo(350, 880); ctx.stroke();
+        
+        // Branch 2 (class2 branch)
+        ctx.beginPath(); ctx.moveTo(650, 820); ctx.lineTo(700, 820); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(650, 880); ctx.lineTo(700, 880); ctx.stroke();
+        
+        // Branch 3 (toilet branch)
+        ctx.beginPath(); ctx.moveTo(300, 1220); ctx.lineTo(350, 1220); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(300, 1280); ctx.lineTo(350, 1280); ctx.stroke();
+        
+        // Branch 4 (storage branch)
+        ctx.beginPath(); ctx.moveTo(650, 1220); ctx.lineTo(700, 1220); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(650, 1280); ctx.lineTo(700, 1280); ctx.stroke();
       }
 
       // Draw Wall outlines
@@ -2570,33 +2785,85 @@
     }
 
     function drawComputationDesk() {
+      // Find if anyone is ready on seats
+      let leftReady = false;
+      let rightReady = false;
+      for (const id in students) {
+        const s = students[id];
+        if (s.isReady) {
+          if (Math.hypot(s.x - LEFT_SEAT_X, s.y - LEFT_SEAT_Y) < 5) leftReady = true;
+          if (Math.hypot(s.x - RIGHT_SEAT_X, s.y - RIGHT_SEAT_Y) < 5) rightReady = true;
+        }
+      }
+
       // Draw left seat (red cushion)
       ctx.fillStyle = '#ef4444';
       ctx.fillRect(LEFT_SEAT_X - 12, LEFT_SEAT_Y - 12, 24, 24);
-      ctx.strokeStyle = '#0f172a';
-      ctx.lineWidth = 2;
+      ctx.strokeStyle = leftReady ? '#22c55e' : '#0f172a'; // Green glowing border if ready
+      ctx.lineWidth = leftReady ? 3 : 2;
       ctx.strokeRect(LEFT_SEAT_X - 12, LEFT_SEAT_Y - 12, 24, 24);
+      if (leftReady) {
+        // Draw green checkmark on seat
+        ctx.strokeStyle = '#22c55e';
+        ctx.beginPath();
+        ctx.moveTo(LEFT_SEAT_X - 5, LEFT_SEAT_Y);
+        ctx.lineTo(LEFT_SEAT_X - 1, LEFT_SEAT_Y + 4);
+        ctx.lineTo(LEFT_SEAT_X + 5, LEFT_SEAT_Y - 3);
+        ctx.stroke();
+      }
 
       // Draw right seat (green cushion)
       ctx.fillStyle = '#10b981';
       ctx.fillRect(RIGHT_SEAT_X - 12, RIGHT_SEAT_Y - 12, 24, 24);
+      ctx.strokeStyle = rightReady ? '#22c55e' : '#0f172a';
+      ctx.lineWidth = rightReady ? 3 : 2;
       ctx.strokeRect(RIGHT_SEAT_X - 12, RIGHT_SEAT_Y - 12, 24, 24);
+      if (rightReady) {
+        // Draw white checkmark on seat
+        ctx.strokeStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.moveTo(RIGHT_SEAT_X - 5, RIGHT_SEAT_Y);
+        ctx.lineTo(RIGHT_SEAT_X - 1, RIGHT_SEAT_Y + 4);
+        ctx.lineTo(RIGHT_SEAT_X + 5, RIGHT_SEAT_Y - 3);
+        ctx.stroke();
+      }
 
-      // Draw table block (wooden desk)
-      ctx.fillStyle = '#8b4513';
-      ctx.fillRect(DESK_X - 25, DESK_Y - 15, 50, 30);
-      ctx.strokeStyle = '#0f172a';
-      ctx.strokeRect(DESK_X - 25, DESK_Y - 15, 50, 30);
+      // Restore stroke width
+      ctx.lineWidth = 1.5;
 
-      // Glowing display screen on desk
-      const glow = (Math.sin(Date.now() / 200) + 1) / 2;
-      ctx.fillStyle = `rgba(0, 229, 255, ${0.4 + glow * 0.5})`;
-      ctx.fillRect(DESK_X - 10, DESK_Y - 8, 20, 16);
+      // Draw Desk (matching the uploaded image)
+      // 1. Top silver bezel frame
+      ctx.fillStyle = '#cbd5e1'; // light silver
+      ctx.fillRect(DESK_X - 22, DESK_Y - 25, 44, 12);
+      ctx.strokeStyle = '#475569';
+      ctx.strokeRect(DESK_X - 22, DESK_Y - 25, 44, 12);
       
-      // Text "X"
+      // Top glossy white line
       ctx.fillStyle = '#ffffff';
-      ctx.font = '12px DungGeunMo';
-      ctx.fillText('×', DESK_X - 5, DESK_Y + 5);
+      ctx.fillRect(DESK_X - 20, DESK_Y - 24, 40, 2);
+
+      // 2. Middle brown desk body
+      ctx.fillStyle = '#8b5a2b'; // brown desk
+      ctx.fillRect(DESK_X - 16, DESK_Y - 13, 32, 26);
+      ctx.strokeStyle = '#5c3a21';
+      ctx.strokeRect(DESK_X - 16, DESK_Y - 13, 32, 26);
+
+      // Screen inside desk (beige/grey)
+      ctx.fillStyle = '#dfd0bc';
+      ctx.fillRect(DESK_X - 11, DESK_Y - 8, 22, 16);
+      ctx.strokeStyle = '#cbd5e1';
+      ctx.strokeRect(DESK_X - 11, DESK_Y - 8, 22, 16);
+
+      // screen multiplication indicator
+      const glow = (Math.sin(Date.now() / 200) + 1) / 2;
+      ctx.fillStyle = `rgba(239, 68, 68, ${0.3 + glow * 0.4})`; // blinking multiplication dot
+      ctx.beginPath(); ctx.arc(DESK_X, DESK_Y, 4, 0, Math.PI*2); ctx.fill();
+
+      // 3. Bottom silver bezel base
+      ctx.fillStyle = '#cbd5e1';
+      ctx.fillRect(DESK_X - 22, DESK_Y + 13, 44, 12);
+      ctx.strokeStyle = '#475569';
+      ctx.strokeRect(DESK_X - 22, DESK_Y + 13, 44, 12);
     }
 
     function drawSparkles(x, y) {
@@ -2839,7 +3106,10 @@
       ctx.font = 'bold 11px DungGeunMo';
       ctx.textAlign = 'center';
       
-      const dispName = s.id === currentControlledId ? `[나] ${s.name}` : s.name;
+      let dispName = s.id === currentControlledId ? `[나] ${s.name}` : s.name;
+      if (s.isReady) {
+        dispName = `[준비] ${dispName}`;
+      }
       
       // Draw white outline
       ctx.strokeStyle = '#ffffff';
@@ -2847,7 +3117,7 @@
       ctx.strokeText(dispName, s.x, s.y - s.radius - 8);
       
       // Fill text in charcoal dark marker color
-      ctx.fillStyle = '#0f172a';
+      ctx.fillStyle = s.isReady ? '#22c55e' : '#0f172a';
       ctx.fillText(dispName, s.x, s.y - s.radius - 8);
     }
 
@@ -3051,6 +3321,23 @@
       if (!s) return;
 
       s.room = 'hallway';
+      s.isReady = true;
+
+      const seatX = side === 'left' ? LEFT_SEAT_X : RIGHT_SEAT_X;
+      const seatY = side === 'left' ? LEFT_SEAT_Y : RIGHT_SEAT_Y;
+
+      // Release other ready participants on this seat
+      for (const id in students) {
+        if (id !== targetId && students[id].isReady) {
+          if (Math.hypot(students[id].x - seatX, students[id].y - seatY) < 5) {
+            students[id].isReady = false;
+            if (isFirebaseConnected) {
+              fbRoomRef.child('users').child(id).update({ isReady: false });
+            }
+          }
+        }
+      }
+
       if (side === 'left') {
         s.x = LEFT_SEAT_X;
         s.y = LEFT_SEAT_Y;
@@ -3066,7 +3353,8 @@
           x: s.x,
           y: s.y,
           currentRoom: s.room,
-          direction: s.direction
+          direction: s.direction,
+          isReady: s.isReady
         });
       }
     }
@@ -3369,6 +3657,7 @@
             }
             localUser.secretValue = remoteUser.secretValue;
             localUser.isMafia = remoteUser.isMafia;
+            localUser.isReady = !!remoteUser.isReady;
             
             if (remoteUser.msg && remoteUser.msg !== localUser.chatBubble) {
               triggerBubbleChat(id, remoteUser.msg);
