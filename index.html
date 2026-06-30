@@ -210,9 +210,50 @@
       border-radius: 12px;
       padding: 25px;
       width: 90%;
-      max-width: 380px;
-      text-align: center;
+      max-width: 580px; /* Extended to support dual columns */
+      display: flex;
+      gap: 20px;
       box-shadow: inset 0 0 10px rgba(0,0,0,0.8), 0 8px 25px rgba(0,0,0,0.6);
+      box-sizing: border-box;
+      text-align: left;
+    }
+
+    /* Modal Columns */
+    .modal-left {
+      flex: 1;
+      border-right: 2px dashed rgba(255,255,255,0.15);
+      padding-right: 15px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-height: 240px;
+    }
+
+    .modal-right {
+      flex: 1.2;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 12px;
+    }
+
+    .waiting-list-container {
+      background: rgba(0,0,0,0.3);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 6px;
+      padding: 8px;
+      flex: 1;
+      overflow-y: auto;
+      font-family: var(--font-chalk);
+      font-size: 0.95rem;
+      color: var(--chalk-yellow);
+      max-height: 180px;
+    }
+
+    .waiting-item {
+      padding: 4px;
+      border-bottom: 1px dashed rgba(255,255,255,0.05);
+      color: var(--chalk-yellow);
     }
 
     .modal-title {
@@ -454,6 +495,7 @@
     }
 
     /* Secret Value Reveal Modal Card */
+    /* Secret Value Reveal Modal Card */
     .secret-popup-overlay {
       position: absolute;
       top: 0;
@@ -469,32 +511,33 @@
 
     .secret-card {
       background: radial-gradient(circle, #2e583c 60%, #1c3b27 100%);
-      border: 10px solid var(--wood-brown);
+      border: 6px solid var(--wood-brown); /* Thinner border */
       border-radius: 12px;
-      padding: 30px;
-      width: 85%;
-      max-width: 420px;
+      padding: 15px 25px; /* Compact padding */
+      width: 90%;
+      max-width: 380px;
       text-align: center;
       box-shadow: inset 0 0 10px rgba(0,0,0,0.8), 0 8px 25px rgba(0,0,0,0.7);
       animation: card-appear 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      box-sizing: border-box;
     }
 
     .secret-card-title {
       font-family: var(--font-chalk);
-      font-size: 1.8rem;
+      font-size: 1.4rem; /* Thinner title */
       color: var(--chalk-white);
-      margin-bottom: 20px;
+      margin-bottom: 10px;
       border-bottom: 2px dashed rgba(255,255,255,0.2);
-      padding-bottom: 10px;
+      padding-bottom: 5px;
       text-shadow: 1px 1px 2px #000;
     }
 
     .secret-role-box {
       font-family: var(--font-chalk);
-      font-size: 2rem;
-      margin: 15px 0;
-      padding: 8px;
-      border-radius: 8px;
+      font-size: 1.4rem; /* Smaller role font */
+      margin: 10px 0;
+      padding: 5px;
+      border-radius: 6px;
     }
 
     .role-citizen {
@@ -511,29 +554,29 @@
 
     .secret-value-box {
       font-family: var(--font-chalk);
-      font-size: 3.5rem;
+      font-size: 2.8rem; /* Smaller secret number */
       color: var(--chalk-yellow);
       text-shadow: 2px 2px 4px #000;
-      margin: 20px 0;
+      margin: 10px 0;
     }
 
     .secret-warning {
-      font-size: 0.9rem;
+      font-size: 0.8rem; /* Thinner font */
       color: #9ab3a3;
-      margin-bottom: 25px;
-      line-height: 1.4;
+      margin-bottom: 15px;
+      line-height: 1.3;
       font-family: var(--font-chalk);
     }
 
     .secret-close-btn {
       width: 100%;
-      padding: 12px;
+      padding: 8px; /* Thinner button */
       background: linear-gradient(135deg, #a0522d 0%, #8b4513 100%);
       color: #fff;
       border: 2px solid #cd853f;
       border-radius: 8px;
       font-family: var(--font-chalk);
-      font-size: 1.2rem;
+      font-size: 1.1rem;
       font-weight: bold;
       cursor: pointer;
       transition: background 0.3s;
@@ -1136,11 +1179,24 @@
   <!-- 2. Admin Password Modal -->
   <div id="admin-modal" class="modal-overlay">
     <div class="modal-content">
-      <h3 class="modal-title">관리자 액세스 코드</h3>
-      <input type="password" id="admin-password" class="modal-input" placeholder="••••" maxlength="6">
-      <div class="modal-btn-row">
-        <button class="modal-btn confirm" onclick="submitAdminPassword()">확인</button>
-        <button class="modal-btn cancel" onclick="closeAdminModal()">취소</button>
+      <!-- Left Column: Participant List -->
+      <div class="modal-left">
+        <div style="font-family: var(--font-chalk); font-size: 1.15rem; color: #fff; font-weight: bold; text-shadow: 1px 1px 2px #000;">
+          👥 대기 참가자 (<span id="waiting-count">0</span>명)
+        </div>
+        <div class="waiting-list-container" id="modal-waiting-list">
+          <div style="color: #94a3b8; font-size: 0.85rem; text-align: center; margin-top: 20px;">대기 중인 참가자가 없습니다.</div>
+        </div>
+      </div>
+      
+      <!-- Right Column: Authentication & Start Trigger -->
+      <div class="modal-right" id="modal-controls-wrapper">
+        <h3 class="modal-title" style="margin: 0; font-size: 1.25rem;">관리자 액세스 코드</h3>
+        <input type="password" id="admin-password" class="modal-input" placeholder="••••" maxlength="6" style="width: 100%; box-sizing: border-box;">
+        <div class="modal-btn-row">
+          <button class="modal-btn confirm" onclick="submitAdminPassword()">확인</button>
+          <button class="modal-btn cancel" onclick="closeAdminModal()">취소</button>
+        </div>
       </div>
     </div>
   </div>
@@ -1458,6 +1514,7 @@
     generateUniqueNicknames();
     window.addEventListener('DOMContentLoaded', () => {
       updateLobbyNicknameDisplay();
+      autoConnectFirebase();
     });
 
     // --- 3. State Management ---
@@ -1474,6 +1531,7 @@
     let gameInterval = null;
     let scanInterval = null;
     let isGameOver = false;
+    let lastScannedMaxVal = 2; // Cache for 2-minute periodic scanned maximum value
 
     // Chat archives per room: { room_id: [ { name, msg, time } ] }
     let chatArchives = {
@@ -1711,25 +1769,50 @@
     }
 
     // --- 6. Lobby & Login Rules ---
+    // --- 6. Lobby & Login Rules ---
     function openAdminModal() {
       playSound('click');
       document.getElementById('admin-modal').style.display = 'flex';
+      
+      // If we are connected, start listening to waiting room updates
+      if (isFirebaseConnected) {
+        setupWaitingRoomListeners();
+      }
+      
+      // Reset input wrap in case they logged in before
+      document.getElementById('modal-controls-wrapper').innerHTML = `
+        <h3 class="modal-title" style="margin: 0; font-size: 1.25rem;">관리자 액세스 코드</h3>
+        <input type="password" id="admin-password" class="modal-input" placeholder="••••" maxlength="6" style="width: 100%; box-sizing: border-box;">
+        <div class="modal-btn-row">
+          <button class="modal-btn confirm" onclick="submitAdminPassword()">확인</button>
+          <button class="modal-btn cancel" onclick="closeAdminModal()">취소</button>
+        </div>
+      `;
       document.getElementById('admin-password').focus();
     }
 
     function closeAdminModal() {
       playSound('click');
       document.getElementById('admin-modal').style.display = 'none';
-      document.getElementById('admin-password').value = '';
+      if (isFirebaseConnected) {
+        fbRoomRef.child('waiting_room').off('value');
+      }
     }
 
     function submitAdminPassword() {
+      playSound('click');
       const pass = document.getElementById('admin-password').value;
       if (pass === '2525') {
         playSound('success');
-        isAdmin = true;
-        closeAdminModal();
-        enterGame();
+        
+        // Admin authenticated! Show "Start Game" button instead of input form
+        const wrapper = document.getElementById('modal-controls-wrapper');
+        wrapper.innerHTML = `
+          <h3 class="modal-title" style="margin: 0; font-size: 1.25rem; color: #10b981;">✅ 인증 완료</h3>
+          <p style="font-size: 0.85rem; color: #94a3b8; margin: 5px 0; line-height: 1.4;">대기 중인 모든 학생들을 맵에 참가시키고 게임을 시작합니다.</p>
+          <button class="lobby-btn" onclick="adminStartGame()" style="background: #10b981; border-color: #059669; width: 100%; margin-top: 10px; padding: 12px; font-weight: bold;">🚀 게임 시작 (Start Game)</button>
+          <button class="modal-btn cancel" onclick="closeAdminModal()" style="width: 100%; margin-top: 8px;">취소</button>
+        `;
       } else {
         playSound('fail');
         alert('비밀번호가 올바르지 않습니다. (비밀번호: 2525)');
@@ -1737,11 +1820,155 @@
       }
     }
 
+    function adminStartGame() {
+      playSound('click');
+      
+      if (!isFirebaseConnected) {
+        // Local fallback (Admin starts locally directly)
+        isAdmin = true;
+        myId = 'student_1';
+        enterGame();
+        closeAdminModal();
+        return;
+      }
+
+      // 1. Fetch waiting room list
+      fbRoomRef.child('waiting_room').once('value', (snap) => {
+        const waitingData = snap.val() || {};
+        const waitingNames = Object.keys(waitingData);
+
+        // 2. Clear old assignments and write new ones
+        const assignments = {};
+        
+        // Loop and assign up to 30 waiting students to student_1 ... student_30
+        for (let i = 0; i < Math.min(waitingNames.length, 30); i++) {
+          const nickname = waitingNames[i];
+          const studentId = `student_${i + 1}`;
+          assignments[nickname] = studentId;
+
+          // Update local student nickname
+          if (students[studentId]) {
+            students[studentId].name = nickname;
+          }
+        }
+
+        // Update Firebase database nodes
+        fbRoomRef.child('assignments').set(assignments).then(() => {
+          // Set game_started = true
+          fbRoomRef.child('game_started').set(true).then(() => {
+            // Upload initialized state to Firebase (with assigned names!)
+            uploadLocalStateToFirebase();
+            
+            isAdmin = true;
+            myId = 'student_1';
+            enterGame();
+            closeAdminModal();
+          });
+        });
+      });
+    }
+
     function joinAsStudent() {
       playSound('click');
-      myId = 'student_1'; // Local play controlled by student_1 by default
-      isAdmin = false;
-      enterGame();
+      const nickname = document.getElementById('player-nickname-display').textContent.trim();
+      
+      if (!isFirebaseConnected) {
+        // Local simulation fallback: immediately enter game
+        myId = 'student_1';
+        isAdmin = false;
+        enterGame();
+        return;
+      }
+
+      // Switch lobby box UI to waiting state
+      const lobbyBox = document.querySelector('.lobby-box');
+      lobbyBox.innerHTML = `
+        <div id="waiting-status" style="font-family: var(--font-chalk); text-align: center; color: var(--chalk-yellow); font-size: 1.5rem; margin: 15px 0; line-height: 1.5;">
+          ⌛ 대기 중...
+          <div style="font-size: 1rem; color: #fff; margin-top: 10px; font-weight: normal; line-height: 1.4;">
+            관리자가 게임을 시작할 때까지 대기해 주세요.<br>
+            지정 닉네임: <span style="color: var(--chalk-yellow); font-weight: bold;">${nickname}</span>
+          </div>
+        </div>
+      `;
+
+      // Register in waiting room node
+      fbRoomRef.child('waiting_room').child(nickname).set({
+        status: 'waiting',
+        timestamp: Date.now()
+      });
+
+      // Listen for game start and assignments
+      fbRoomRef.child('game_started').on('value', (snap) => {
+        const started = snap.val();
+        if (started) {
+          // Get assignment
+          fbRoomRef.child('assignments').child(nickname).once('value', (assignSnap) => {
+            const assignedId = assignSnap.val();
+            if (assignedId) {
+              myId = assignedId;
+              isAdmin = false;
+              
+              // Clean up listeners
+              fbRoomRef.child('game_started').off('value');
+              enterGame();
+            }
+          });
+        }
+      });
+    }
+
+    function autoConnectFirebase() {
+      const apiKey = document.getElementById('fb-apikey').value.trim();
+      const dbUrl = document.getElementById('fb-dburl').value.trim();
+      const projId = document.getElementById('fb-projectid').value.trim();
+      if (!apiKey || !dbUrl) return;
+
+      const firebaseConfig = {
+        apiKey: apiKey,
+        databaseURL: dbUrl,
+        projectId: projId
+      };
+
+      try {
+        if (firebase.apps.length === 0) {
+          fbApp = firebase.initializeApp(firebaseConfig);
+        } else {
+          fbApp = firebase.app();
+        }
+
+        fbDatabase = firebase.database();
+        isFirebaseConnected = true;
+        fbRoomRef = fbDatabase.ref('rooms/school_session_1');
+
+        document.getElementById('firebase-status-text').textContent = "네트워크 상태: Firebase 실시간 연결됨";
+        document.getElementById('firebase-status-text').style.color = '#10b981';
+
+        setupFirebaseSyncListeners();
+      } catch (err) {
+        console.error("Auto-connect Firebase failed:", err);
+      }
+    }
+
+    function setupWaitingRoomListeners() {
+      if (!isFirebaseConnected) return;
+
+      fbRoomRef.child('waiting_room').on('value', (snap) => {
+        const data = snap.val() || {};
+        const listContainer = document.getElementById('modal-waiting-list');
+        const countSpan = document.getElementById('waiting-count');
+
+        const names = Object.keys(data);
+        countSpan.textContent = names.length;
+
+        if (names.length === 0) {
+          listContainer.innerHTML = `<div style="color: #94a3b8; font-size: 0.85rem; text-align: center; margin-top: 20px;">대기 중인 참가자가 없습니다.</div>`;
+        } else {
+          listContainer.innerHTML = names.map(name => `
+            <div class="waiting-item">👤 ${name}</div>
+          `).join('');
+        }
+      });
     }
 
     function enterGame() {
@@ -1847,7 +2074,8 @@
           radius: 13,
           speed: 4.5,
           chatBubble: '',
-          chatBubbleTimer: 0
+          chatBubbleTimer: 0,
+          multipliedWithStr: ''
         };
       }
 
@@ -3370,6 +3598,30 @@
       
       if (!uA || !uB) return;
 
+      // Check if they have already multiplied
+      let listA = uA.multipliedWithStr ? uA.multipliedWithStr.split(',') : [];
+      let listB = uB.multipliedWithStr ? uB.multipliedWithStr.split(',') : [];
+
+      if (listA.includes(idB) || listB.includes(idA)) {
+        // Play fail sound
+        playSound('fail');
+
+        // Show "Already Multiplied" alert on both participants' screens
+        const isPartInvolved = (currentControlledId === idA || currentControlledId === idB);
+        if (isPartInvolved && !isAdmin) {
+          const popup = document.getElementById('multiply-popup');
+          popup.textContent = '이미 연산이 진행된 상대입니다.';
+          popup.style.display = 'block';
+          multiplySuccessTextTimer = 180; // Auto-hide after 3 seconds
+        }
+
+        // Reset triggerMultiplication in Firebase if admin is performing it
+        if (isFirebaseConnected && isAdmin) {
+          fbRoomRef.child('interaction').update({ triggerMultiplication: false });
+        }
+        return;
+      }
+
       const oldValA = uA.secretValue;
       const oldValB = uB.secretValue;
 
@@ -3386,6 +3638,12 @@
       uA.secretValue = newVal;
       uB.secretValue = newVal;
 
+      // Record interaction history on both students
+      listA.push(idB);
+      listB.push(idA);
+      uA.multipliedWithStr = listA.filter(x => x).join(',');
+      uB.multipliedWithStr = listB.filter(x => x).join(',');
+
       multiplyVfxTimer = 45;
 
       if (infected) {
@@ -3398,15 +3656,17 @@
 
       const isPartInvolved = (currentControlledId === idA || currentControlledId === idB);
       if (isPartInvolved && !isAdmin) {
-        document.getElementById('multiply-popup').style.display = 'block';
+        const popup = document.getElementById('multiply-popup');
+        popup.textContent = '두 학생의 비밀의 값이 각각 상대방의 비밀의 값과 곱해졌습니다.';
+        popup.style.display = 'block';
         multiplySuccessTextTimer = 180;
       }
 
       updateBillboardUI();
       
       if (isFirebaseConnected) {
-        fbRoomRef.child('users').child(idA).update({ secretValue: newVal });
-        fbRoomRef.child('users').child(idB).update({ secretValue: newVal });
+        fbRoomRef.child('users').child(idA).update({ secretValue: newVal, multipliedWithStr: uA.multipliedWithStr });
+        fbRoomRef.child('users').child(idB).update({ secretValue: newVal, multipliedWithStr: uB.multipliedWithStr });
         fbRoomRef.child('interaction').update({ triggerMultiplication: false });
       }
     }
@@ -3486,6 +3746,15 @@
         performPeriodicDataScan();
       }, 120000); // 2 minutes
       
+      // Initialize starting cached maximum value (usually 2)
+      let initialMax = 0;
+      for (const id in students) {
+        if (students[id].secretValue > initialMax) {
+          initialMax = students[id].secretValue;
+        }
+      }
+      lastScannedMaxVal = initialMax;
+
       updateBillboardUI();
     }
 
@@ -3527,6 +3796,10 @@
         }
       }
 
+      // Update the 2-minute cached max value
+      lastScannedMaxVal = maxVal;
+      updateBillboardUI();
+
       const ticker = document.getElementById('billboard-status-text');
       const scanMessage = `[🚨 전광판 스캔 완료] 최고 비밀값: ${formatNumber(maxVal)} | 감염자 수(0 보유): ${zeroCount}명`;
       ticker.textContent = scanMessage;
@@ -3543,17 +3816,10 @@
     }
 
     function updateBillboardUI() {
-      let maxVal = 0;
-      for (const id in students) {
-        const s = students[id];
-        if (s.secretValue > maxVal) {
-          maxVal = s.secretValue;
-        }
-      }
-
-      const percent = calculateLogProgress(maxVal);
+      // Use the cached lastScannedMaxVal (only updated every 2 minutes or upon initialization/finish)
+      const percent = calculateLogProgress(lastScannedMaxVal);
       document.getElementById('goal-progress-bar').style.width = `${percent}%`;
-      document.getElementById('goal-progress-text').textContent = `최고 비밀값: ${formatNumber(maxVal)} (${percent.toFixed(1)}% 달성)`;
+      document.getElementById('goal-progress-text').textContent = `최고 비밀값: ${formatNumber(lastScannedMaxVal)} (${percent.toFixed(1)}% 달성)`;
     }
 
     // --- 19. Game Endings UI Sequence ---
@@ -3582,6 +3848,9 @@
           maxVal = s.secretValue;
         }
       }
+      
+      lastScannedMaxVal = maxVal;
+      updateBillboardUI();
       
       const success = (maxVal >= 1099511627776);
       showGameResult(success);
@@ -3659,9 +3928,17 @@
 
     function restartGame() {
       playSound('click');
+      if (isFirebaseConnected) {
+        fbRoomRef.child('game_started').set(false);
+        fbRoomRef.child('waiting_room').set({});
+        fbRoomRef.child('assignments').set({});
+      }
       document.getElementById('end-screen').style.display = 'none';
       document.getElementById('game-container').style.display = 'none';
       document.getElementById('lobby-screen').style.display = 'flex';
+      
+      // Reload page to clean up everything and re-initialize
+      location.reload();
     }
 
     // --- 20. Firebase Integration Handler ---
@@ -3727,7 +4004,8 @@
           secretValue: s.secretValue,
           isMafia: s.isMafia,
           color: s.color,
-          direction: s.direction
+          direction: s.direction,
+          multipliedWithStr: s.multipliedWithStr || ''
         });
       }
 
@@ -3756,6 +4034,7 @@
               localUser.direction = remoteUser.direction;
             }
             localUser.secretValue = remoteUser.secretValue;
+            localUser.multipliedWithStr = remoteUser.multipliedWithStr || '';
             localUser.isMafia = remoteUser.isMafia;
             localUser.isReady = !!remoteUser.isReady;
             
