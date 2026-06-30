@@ -1367,7 +1367,7 @@
       class2: { name: '교실 2', color: '#faf8f0', x: 1100, y: 700, w: 300, h: 300, wallColor: '#475569' },
       toilet: { name: '컴퓨터실', color: '#faf8f0', x: 0, y: 1100, w: 300, h: 300, wallColor: '#475569' },
       storage: { name: '창고', color: '#faf8f0', x: 1100, y: 1100, w: 300, h: 300, wallColor: '#475569' },
-      hallway: { name: '복도', color: '#faf8f0', x: 550, y: 650, w: 300, h: 1100, wallColor: '#475569' }
+      hallway: { name: '복도', color: '#5c3e21', x: 550, y: 650, w: 300, h: 1100, wallColor: '#475569' }
     };
 
     const DOORS = {
@@ -1447,6 +1447,7 @@
     let myId = '';
     let isAdmin = false;
     let currentControlledId = ''; // Player currently controlled
+    let lastActiveRoom = ''; // Track player room for chat sync
     
     // Core game database states (contains 30 students)
     let students = {};
@@ -1806,9 +1807,10 @@
         // Generate a random distinct neon pixel color
         const color = `hsl(${(i * 12) % 360}, 90%, 60%)`;
         
-        // Distribute starting positions inside the Auditorium: X in [300, 700], Y in [200, 500]
-        const sx = 300 + ((i % 6) * 70) + Math.random() * 20;
-        const sy = 150 + (Math.floor(i / 6) * 70) + Math.random() * 20;
+        // Distribute starting positions inside the Auditorium: Centered around Auditorium center
+        const aud = ROOMS.auditorium;
+        const sx = aud.x + 100 + ((i % 6) * 65) + Math.random() * 15;
+        const sy = aud.y + 100 + (Math.floor(i / 6) * 65) + Math.random() * 15;
 
         // Assign a procedural styleId from 1 to 6
         const styleId = ((i - 1) % 6) + 1;
@@ -2267,6 +2269,15 @@
 
       // 6. Update Ready button visibility
       updateReadyButtonVisibility();
+
+      // 7. Sync current chat log room to player's active room in real-time
+      if (!isAdmin && students[currentControlledId]) {
+        const player = students[currentControlledId];
+        if (player.room !== lastActiveRoom) {
+          lastActiveRoom = player.room;
+          refreshChatDisplay();
+        }
+      }
     }
 
     function checkMultiplyDeskCondition() {
@@ -2766,8 +2777,8 @@
         ctx.fillRect(r.x + 32, r.y + r.h - 52, 6, 4);
         ctx.fillRect(r.x + 52, r.y + r.h - 44, 5, 4);
       } else {
-        // Hallway (default)
-        ctx.fillStyle = '#f1f5f9';
+        // Hallway (default - Wooden dark brown floor)
+        ctx.fillStyle = r.color;
         ctx.fillRect(r.x, r.y, r.w, r.h);
         
         // 4 Horizontal connecting corridor branches (floor)
@@ -2776,11 +2787,24 @@
         ctx.fillRect(300, 1220, 250, 60);
         ctx.fillRect(850, 1220, 250, 60);
 
-        // Vertical lines for tile panels
-        ctx.strokeStyle = '#cbd5e1';
+        // Draw horizontal wood plank lines for the main hallway
+        ctx.strokeStyle = '#422c14'; // Even darker wood plank lines
         ctx.lineWidth = 1;
-        for (let gx = r.x + 30; gx < r.x + r.w; gx += 30) {
-          ctx.beginPath(); ctx.moveTo(gx, r.y); ctx.lineTo(gx, r.y + r.h); ctx.stroke();
+        for (let gy = r.y + 35; gy < r.y + r.h; gy += 35) {
+          ctx.beginPath();
+          ctx.moveTo(r.x, gy);
+          ctx.lineTo(r.x + r.w, gy);
+          ctx.stroke();
+        }
+
+        // Draw vertical wood plank lines for the horizontal corridors
+        for (let gx = 300 + 35; gx < 550; gx += 35) {
+          ctx.beginPath(); ctx.moveTo(gx, 820); ctx.lineTo(gx, 880); ctx.stroke();
+          ctx.beginPath(); ctx.moveTo(gx, 1220); ctx.lineTo(gx, 1280); ctx.stroke();
+        }
+        for (let gx = 850 + 35; gx < 1100; gx += 35) {
+          ctx.beginPath(); ctx.moveTo(gx, 820); ctx.lineTo(gx, 880); ctx.stroke();
+          ctx.beginPath(); ctx.moveTo(gx, 1220); ctx.lineTo(gx, 1280); ctx.stroke();
         }
 
         // Draw horizontal wall lines on top/bottom of the branches
@@ -3198,12 +3222,45 @@
       minimapCtx.fillStyle = '#faf8f0';
       minimapCtx.fillRect(0, 0, 300, 170);
 
-      const scaleX = 0.27;
+      const scaleX = 0.19;
       const scaleY = 0.085;
-      const ox = 15;
+      const ox = 17;
       const oy = 8;
 
-      // Draw rooms
+      // 1. Draw 4 corridor branches in minimap
+      minimapCtx.fillStyle = '#ffffff'; // whiteboard room interior
+      minimapCtx.strokeStyle = '#475569'; // Grey-black marker for hallway
+      minimapCtx.lineWidth = 1.5;
+
+      const branches = [
+        { x: 300, y: 820, w: 250, h: 60 },
+        { x: 850, y: 820, w: 250, h: 60 },
+        { x: 300, y: 1220, w: 250, h: 60 },
+        { x: 850, y: 1220, w: 250, h: 60 }
+      ];
+
+      branches.forEach(b => {
+        const bx = b.x * scaleX + ox;
+        const by = b.y * scaleY + oy;
+        const bw = b.w * scaleX;
+        const bh = b.h * scaleY;
+        
+        minimapCtx.fillRect(bx, by, bw, bh);
+        
+        // Draw top line
+        minimapCtx.beginPath();
+        minimapCtx.moveTo(bx, by);
+        minimapCtx.lineTo(bx + bw, by);
+        minimapCtx.stroke();
+        
+        // Draw bottom line
+        minimapCtx.beginPath();
+        minimapCtx.moveTo(bx, by + bh);
+        minimapCtx.lineTo(bx + bw, by + bh);
+        minimapCtx.stroke();
+      });
+
+      // 2. Draw rooms
       for (const k in ROOMS) {
         const r = ROOMS[k];
         const rx = r.x * scaleX + ox;
