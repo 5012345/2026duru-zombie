@@ -848,6 +848,8 @@
       gap: 8px;
       box-shadow: 0 4px 10px rgba(0,0,0,0.4);
       position: relative;
+      max-width: 600px; /* Shorten the length */
+      margin: 15px auto 0 auto; /* Center it */
     }
 
     .chat-input-bar::after {
@@ -1248,9 +1250,9 @@
           <details class="firebase-details">
             <summary>🔗 Firebase RTDB 연동 설정</summary>
             <div class="firebase-form">
-              <input type="text" id="fb-apikey" class="firebase-input" placeholder="API Key">
-              <input type="text" id="fb-dburl" class="firebase-input" placeholder="Database URL">
-              <input type="text" id="fb-projectid" class="firebase-input" placeholder="Project ID">
+              <input type="text" id="fb-apikey" class="firebase-input" value="AIzaSyC8mexu1ESxoEKvYDfXunh2aFbWsMX5RT0" placeholder="API Key">
+              <input type="text" id="fb-dburl" class="firebase-input" value="https://duru-zombie-default-rtdb.asia-southeast1.firebasedatabase.app/" placeholder="Database URL">
+              <input type="text" id="fb-projectid" class="firebase-input" value="duru-zombie" placeholder="Project ID">
               <button class="firebase-btn" onclick="connectFirebase()">Firebase 연결</button>
             </div>
           </details>
@@ -1350,37 +1352,37 @@
     }
 
     // --- 2. Game Configurations & Room Layout Bounds ---
-    const MAP_WIDTH = 1000;
+    const MAP_WIDTH = 1400;
     const MAP_HEIGHT = 1800;
     const VIEWPORT_WIDTH = 780;
     const VIEWPORT_HEIGHT = 550;
 
     const ROOMS = {
-      auditorium: { name: '강당', color: '#faf8f0', x: 200, y: 50, w: 600, h: 600, wallColor: '#475569' },
+      auditorium: { name: '강당', color: '#faf8f0', x: 400, y: 50, w: 600, h: 600, wallColor: '#475569' },
       class1: { name: '교실 1', color: '#faf8f0', x: 0, y: 700, w: 300, h: 300, wallColor: '#475569' },
-      class2: { name: '교실 2', color: '#faf8f0', x: 700, y: 700, w: 300, h: 300, wallColor: '#475569' },
+      class2: { name: '교실 2', color: '#faf8f0', x: 1100, y: 700, w: 300, h: 300, wallColor: '#475569' },
       toilet: { name: '컴퓨터실', color: '#faf8f0', x: 0, y: 1100, w: 300, h: 300, wallColor: '#475569' },
-      storage: { name: '창고', color: '#faf8f0', x: 700, y: 1100, w: 300, h: 300, wallColor: '#475569' },
-      hallway: { name: '복도', color: '#faf8f0', x: 350, y: 650, w: 300, h: 1100, wallColor: '#475569' }
+      storage: { name: '창고', color: '#faf8f0', x: 1100, y: 1100, w: 300, h: 300, wallColor: '#475569' },
+      hallway: { name: '복도', color: '#faf8f0', x: 550, y: 650, w: 300, h: 1100, wallColor: '#475569' }
     };
 
     const DOORS = {
-      auditorium: { x1: 450, x2: 550, y: 650, orientation: 'h' },
+      auditorium: { x1: 650, x2: 750, y: 650, orientation: 'h' },
       class1_inner: { x: 300, y1: 820, y2: 880, orientation: 'v' },
-      class1_outer: { x: 350, y1: 820, y2: 880, orientation: 'v' },
-      class2_inner: { x: 700, y1: 820, y2: 880, orientation: 'v' },
-      class2_outer: { x: 650, y1: 820, y2: 880, orientation: 'v' },
+      class1_outer: { x: 550, y1: 820, y2: 880, orientation: 'v' },
+      class2_inner: { x: 1100, y1: 820, y2: 880, orientation: 'v' },
+      class2_outer: { x: 850, y1: 820, y2: 880, orientation: 'v' },
       toilet_inner: { x: 300, y1: 1220, y2: 1280, orientation: 'v' },
-      toilet_outer: { x: 350, y1: 1220, y2: 1280, orientation: 'v' },
-      storage_inner: { x: 700, y1: 1220, y2: 1280, orientation: 'v' },
-      storage_outer: { x: 650, y1: 1220, y2: 1280, orientation: 'v' }
+      toilet_outer: { x: 550, y1: 1220, y2: 1280, orientation: 'v' },
+      storage_inner: { x: 1100, y1: 1220, y2: 1280, orientation: 'v' },
+      storage_outer: { x: 850, y1: 1220, y2: 1280, orientation: 'v' }
     };
 
-    const DESK_X = 500;
+    const DESK_X = 700;
     const DESK_Y = 1650;
-    const LEFT_SEAT_X = 450;
+    const LEFT_SEAT_X = 650;
     const LEFT_SEAT_Y = 1650;
-    const RIGHT_SEAT_X = 550;
+    const RIGHT_SEAT_X = 750;
     const RIGHT_SEAT_Y = 1650;
 
     // Math-themed Nickname Parts
@@ -1543,8 +1545,8 @@
         let minY = bounds.y + r;
         let maxY = bounds.y + bounds.h - r;
 
-        // Doorway transition: Auditorium bottom door (X: 450~550, Y: 650)
-        if (nx >= 450 + r && nx <= 550 - r && ny > maxY) {
+        // Doorway transition: Auditorium bottom door (X: 650~750, Y: 650)
+        if (nx >= 650 + r && nx <= 750 - r && ny > maxY) {
           if (ny >= 650) {
             student.room = 'hallway';
           }
@@ -1561,9 +1563,11 @@
         let maxY = bounds.y + bounds.h - r;
 
         // Doorway transition: Right side door (X: 300, Y: 820~880)
-        if (ny >= 820 + r && ny <= 880 - r && nx > maxX) {
-          if (nx >= 300) {
+        if (ny >= 820 + r && ny <= 880 - r) {
+          if (nx > 300) {
             student.room = 'hallway';
+          } else {
+            nx = Math.max(minX, nx);
           }
         } else {
           nx = Math.max(minX, Math.min(maxX, nx));
@@ -1577,10 +1581,12 @@
         let minY = bounds.y + r;
         let maxY = bounds.y + bounds.h - r;
 
-        // Doorway transition: Left side door (X: 700, Y: 820~880)
-        if (ny >= 820 + r && ny <= 880 - r && nx < minX) {
-          if (nx <= 700) {
+        // Doorway transition: Left side door (X: 1100, Y: 820~880)
+        if (ny >= 820 + r && ny <= 880 - r) {
+          if (nx < 1100) {
             student.room = 'hallway';
+          } else {
+            nx = Math.min(maxX, nx);
           }
         } else {
           nx = Math.max(minX, Math.min(maxX, nx));
@@ -1595,9 +1601,11 @@
         let maxY = bounds.y + bounds.h - r;
 
         // Doorway transition: Right side door (X: 300, Y: 1220~1280)
-        if (ny >= 1220 + r && ny <= 1280 - r && nx > maxX) {
-          if (nx >= 300) {
+        if (ny >= 1220 + r && ny <= 1280 - r) {
+          if (nx > 300) {
             student.room = 'hallway';
+          } else {
+            nx = Math.max(minX, nx);
           }
         } else {
           nx = Math.max(minX, Math.min(maxX, nx));
@@ -1611,10 +1619,12 @@
         let minY = bounds.y + r;
         let maxY = bounds.y + bounds.h - r;
 
-        // Doorway transition: Left side door (X: 700, Y: 1220~1280)
-        if (ny >= 1220 + r && ny <= 1280 - r && nx < minX) {
-          if (nx <= 700) {
+        // Doorway transition: Left side door (X: 1100, Y: 1220~1280)
+        if (ny >= 1220 + r && ny <= 1280 - r) {
+          if (nx < 1100) {
             student.room = 'hallway';
+          } else {
+            nx = Math.min(maxX, nx);
           }
         } else {
           nx = Math.max(minX, Math.min(maxX, nx));
@@ -1623,45 +1633,44 @@
       } 
       else if (currentRoom === 'hallway') {
         const bounds = ROOMS.hallway;
-        let minX = bounds.x + r;
-        let maxX = bounds.x + bounds.w - r;
+        let minX = bounds.x + r; // 550 + r
+        let maxX = bounds.x + bounds.w - r; // 850 - r
         let minY = bounds.y + r;
         let maxY = bounds.y + bounds.h - r;
 
-        // Dynamic horizontal boundaries to allow moving into corridor branches
+        // Expand horizontal movement bounds to include the long corridor branches
         if (ny >= 820 + r && ny <= 880 - r) {
-          minX = 300 + r;
-          maxX = 700 - r;
+          minX = 300;
+          maxX = 1100;
         } else if (ny >= 1220 + r && ny <= 1280 - r) {
-          minX = 300 + r;
-          maxX = 700 - r;
+          minX = 300;
+          maxX = 1100;
         }
 
         // Clamp positions
         nx = Math.max(minX, Math.min(maxX, nx));
         ny = Math.max(minY, Math.min(maxY, ny));
 
-        // Door check 1: Auditorium entry (Y: 650, X: 450~550)
-        if (nx >= 450 + r && nx <= 550 - r && ny < minY) {
+        // Check entry conditions
+        if (ny >= 820 + r && ny <= 880 - r) {
+          if (nx < 300) {
+            student.room = 'class1';
+          } else if (nx > 1100) {
+            student.room = 'class2';
+          }
+        } else if (ny >= 1220 + r && ny <= 1280 - r) {
+          if (nx < 300) {
+            student.room = 'toilet';
+          } else if (nx > 1100) {
+            student.room = 'storage';
+          }
+        } 
+
+        // Door check 1: Auditorium entry (Y: 650, X: 650~750)
+        if (nx >= 650 + r && nx <= 750 - r && ny < minY) {
           if (ny <= 650) {
             student.room = 'auditorium';
           }
-        } 
-        // Door check 2: Classroom 1 entry (X: 300, Y: 820~880)
-        else if (ny >= 820 + r && ny <= 880 - r && nx < 300) {
-          student.room = 'class1';
-        } 
-        // Door check 3: Classroom 2 entry (X: 700, Y: 820~880)
-        else if (ny >= 820 + r && ny <= 880 - r && nx > 700) {
-          student.room = 'class2';
-        } 
-        // Door check 4: Restroom entry (X: 300, Y: 1220~1280)
-        else if (ny >= 1220 + r && ny <= 1280 - r && nx < 300) {
-          student.room = 'toilet';
-        } 
-        // Door check 5: Storage entry (X: 700, Y: 1220~1280)
-        else if (ny >= 1220 + r && ny <= 1280 - r && nx > 700) {
-          student.room = 'storage';
         } 
       }
 
@@ -1771,8 +1780,8 @@
 
     function initializeAllParticipants() {
       // 30 participants
-      // 10% are mafias (3 out of 30, indices e.g., 5, 12, 23)
-      const mafiaIndices = [5, 12, 23]; // Fixed index array for repeatable local test
+      // 6 are mafias (6 out of 30, indices e.g., 5, 10, 12, 18, 23, 27)
+      const mafiaIndices = [5, 10, 12, 18, 23, 27]; // Fixed index array for repeatable local test
       students = {};
       
       for (let i = 1; i <= 30; i++) {
@@ -2745,10 +2754,10 @@
         ctx.fillRect(r.x, r.y, r.w, r.h);
         
         // 4 Horizontal connecting corridor branches (floor)
-        ctx.fillRect(300, 820, 50, 60);
-        ctx.fillRect(650, 820, 50, 60);
-        ctx.fillRect(300, 1220, 50, 60);
-        ctx.fillRect(650, 1220, 50, 60);
+        ctx.fillRect(300, 820, 250, 60);
+        ctx.fillRect(850, 820, 250, 60);
+        ctx.fillRect(300, 1220, 250, 60);
+        ctx.fillRect(850, 1220, 250, 60);
 
         // Vertical lines for tile panels
         ctx.strokeStyle = '#cbd5e1';
@@ -2762,20 +2771,20 @@
         ctx.lineWidth = 4;
         
         // Branch 1 (class1 branch)
-        ctx.beginPath(); ctx.moveTo(300, 820); ctx.lineTo(350, 820); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(300, 880); ctx.lineTo(350, 880); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(300, 820); ctx.lineTo(550, 820); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(300, 880); ctx.lineTo(550, 880); ctx.stroke();
         
         // Branch 2 (class2 branch)
-        ctx.beginPath(); ctx.moveTo(650, 820); ctx.lineTo(700, 820); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(650, 880); ctx.lineTo(700, 880); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(850, 820); ctx.lineTo(1100, 820); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(850, 880); ctx.lineTo(1100, 880); ctx.stroke();
         
         // Branch 3 (toilet branch)
-        ctx.beginPath(); ctx.moveTo(300, 1220); ctx.lineTo(350, 1220); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(300, 1280); ctx.lineTo(350, 1280); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(300, 1220); ctx.lineTo(550, 1220); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(300, 1280); ctx.lineTo(550, 1280); ctx.stroke();
         
         // Branch 4 (storage branch)
-        ctx.beginPath(); ctx.moveTo(650, 1220); ctx.lineTo(700, 1220); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(650, 1280); ctx.lineTo(700, 1280); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(850, 1220); ctx.lineTo(1100, 1220); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(850, 1280); ctx.lineTo(1100, 1280); ctx.stroke();
       }
 
       // Draw Wall outlines
