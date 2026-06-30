@@ -1,0 +1,2633 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>우리 학교의 목표: 1조를 만들어야 해!</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Google Fonts for Retro/Modern look -->
+  <link href="https://fonts.googleapis.com/css2?family=DungGeunMo&family=Outfit:wght@400;700&display=swap" rel="stylesheet">
+  
+  <!-- Firebase Compat SDKs (Provides global 'firebase' object) -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+
+  <style>
+    /* Reset & Design System Tokens */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    :root {
+      --bg-dark: #0f1016;
+      --panel-bg: #181a24;
+      --border-color: #2c2f40;
+      --text-main: #e2e8f0;
+      --text-muted: #718096;
+      
+      /* Neon Theme Colors */
+      --neon-green: #00ff66;
+      --neon-blue: #00e5ff;
+      --neon-yellow: #ffea00;
+      --neon-red: #ff3366;
+      --neon-purple: #bd00ff;
+      
+      /* Font settings */
+      --font-retro: 'DungGeunMo', monospace;
+      --font-modern: 'Outfit', sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: var(--font-modern);
+      overflow-x: hidden;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Lobby Screen Styling */
+    #lobby-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle, #1e1e2f 0%, #08080f 100%);
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 20px;
+    }
+
+    .lobby-header {
+      margin-bottom: 40px;
+      animation: pulse 2s infinite alternate;
+    }
+
+    .lobby-title {
+      font-family: var(--font-retro);
+      font-size: 3rem;
+      color: var(--neon-yellow);
+      text-shadow: 0 0 10px rgba(255, 234, 0, 0.5), 0 0 20px rgba(255, 234, 0, 0.3);
+      margin-bottom: 10px;
+    }
+
+    .lobby-subtitle {
+      font-family: var(--font-retro);
+      font-size: 1.2rem;
+      color: var(--neon-blue);
+    }
+
+    .lobby-box {
+      background: var(--panel-bg);
+      border: 3px solid var(--border-color);
+      border-radius: 12px;
+      padding: 30px;
+      width: 100%;
+      max-width: 450px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5), 0 0 15px rgba(0, 229, 255, 0.1);
+      position: relative;
+    }
+
+    .lobby-input-group {
+      margin-bottom: 20px;
+      text-align: left;
+    }
+
+    .lobby-label {
+      display: block;
+      font-family: var(--font-retro);
+      font-size: 1rem;
+      color: var(--text-main);
+      margin-bottom: 8px;
+    }
+
+    .lobby-input {
+      width: 100%;
+      padding: 12px;
+      background: #0b0c10;
+      border: 2px solid var(--border-color);
+      border-radius: 6px;
+      color: #fff;
+      font-size: 1.1rem;
+      outline: none;
+      transition: border-color 0.3s;
+    }
+
+    .lobby-input:focus {
+      border-color: var(--neon-blue);
+      box-shadow: 0 0 5px rgba(0, 229, 255, 0.5);
+    }
+
+    .lobby-btn {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, #0077ff 0%, #00e5ff 100%);
+      border: none;
+      border-radius: 6px;
+      color: #fff;
+      font-family: var(--font-retro);
+      font-size: 1.2rem;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(0, 119, 255, 0.4);
+      transition: transform 0.1s, box-shadow 0.3s;
+    }
+
+    .lobby-btn:hover {
+      box-shadow: 0 6px 20px rgba(0, 229, 255, 0.6);
+      transform: translateY(-2px);
+    }
+
+    .lobby-btn:active {
+      transform: translateY(1px);
+    }
+
+    .admin-login-trigger {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      padding: 8px 16px;
+      background: transparent;
+      border: 2px solid var(--neon-purple);
+      color: var(--neon-purple);
+      border-radius: 6px;
+      font-family: var(--font-retro);
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: background 0.3s, color 0.3s;
+      z-index: 1001;
+    }
+
+    .admin-login-trigger:hover {
+      background: var(--neon-purple);
+      color: #fff;
+      box-shadow: 0 0 10px rgba(189, 0, 255, 0.5);
+    }
+
+    /* Modal Styling */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.85);
+      z-index: 2000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-content {
+      background: var(--panel-bg);
+      border: 3px solid var(--neon-purple);
+      border-radius: 12px;
+      padding: 25px;
+      width: 90%;
+      max-width: 380px;
+      text-align: center;
+      box-shadow: 0 0 25px rgba(189, 0, 255, 0.3);
+    }
+
+    .modal-title {
+      font-family: var(--font-retro);
+      font-size: 1.3rem;
+      color: var(--neon-purple);
+      margin-bottom: 15px;
+    }
+
+    .modal-input {
+      width: 100%;
+      padding: 10px;
+      background: #0b0c10;
+      border: 2px solid var(--border-color);
+      border-radius: 6px;
+      color: #fff;
+      font-size: 1.2rem;
+      text-align: center;
+      letter-spacing: 5px;
+      outline: none;
+      margin-bottom: 15px;
+    }
+
+    .modal-btn-row {
+      display: flex;
+      gap: 10px;
+    }
+
+    .modal-btn {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      border-radius: 6px;
+      font-family: var(--font-retro);
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
+    .modal-btn.confirm {
+      background: var(--neon-purple);
+      color: #fff;
+    }
+
+    .modal-btn.cancel {
+      background: #333;
+      color: var(--text-main);
+    }
+
+    /* Game Interface Layout */
+    #game-container {
+      display: none;
+      width: 100%;
+      max-width: 1200px;
+      height: 100vh;
+      max-height: 850px;
+      padding: 15px;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    /* Header & Timer */
+    .game-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--panel-bg);
+      border: 2px solid var(--border-color);
+      border-radius: 8px;
+      padding: 10px 20px;
+      font-family: var(--font-retro);
+    }
+
+    .game-title-info {
+      font-size: 1.1rem;
+      color: var(--neon-blue);
+    }
+
+    .game-mode-badge {
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      font-weight: bold;
+    }
+
+    .badge-student {
+      background: rgba(0, 229, 255, 0.15);
+      border: 1px solid var(--neon-blue);
+      color: var(--neon-blue);
+    }
+
+    .badge-admin {
+      background: rgba(189, 0, 255, 0.15);
+      border: 1px solid var(--neon-purple);
+      color: var(--neon-purple);
+    }
+
+    .timer-display {
+      font-size: 1.3rem;
+      color: var(--neon-red);
+      text-shadow: 0 0 5px rgba(255, 51, 102, 0.5);
+    }
+
+    /* Top Billboard (전광판) */
+    .billboard-container {
+      background: #09090d;
+      border: 2px solid #ff5500;
+      box-shadow: 0 0 10px rgba(255, 85, 0, 0.2);
+      border-radius: 8px;
+      padding: 12px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .billboard-ticker {
+      font-family: var(--font-retro);
+      font-size: 1.1rem;
+      color: #ffaa00;
+      text-shadow: 0 0 5px rgba(255, 170, 0, 0.5);
+      white-space: nowrap;
+      overflow: hidden;
+      text-align: center;
+    }
+
+    .billboard-progress-container {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .progress-bar-outer {
+      flex: 1;
+      height: 24px;
+      background: #151520;
+      border: 2px solid #444;
+      border-radius: 12px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .progress-bar-inner {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #00bb33 0%, #00ff66 100%);
+      box-shadow: 0 0 10px var(--neon-green);
+      transition: width 0.5s ease-out;
+    }
+
+    .progress-text {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-retro);
+      font-size: 0.85rem;
+      color: #fff;
+      text-shadow: 1px 1px 2px #000;
+      font-weight: bold;
+    }
+
+    .goal-tag {
+      font-family: var(--font-retro);
+      font-size: 1rem;
+      color: var(--neon-green);
+      text-shadow: 0 0 4px var(--neon-green);
+    }
+
+    /* Main Dashboard Layout */
+    .dashboard-main {
+      flex: 1;
+      display: flex;
+      gap: 15px;
+      min-height: 0; /* Important for flex child scrolling */
+    }
+
+    /* Canvas Frame */
+    .canvas-wrapper {
+      flex: 1.4;
+      background: #000;
+      border: 3px solid var(--border-color);
+      border-radius: 10px;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #game-canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      background: #08080f;
+    }
+
+    /* Space Alert Overlay on Canvas */
+    .room-overlay-banner {
+      position: absolute;
+      top: 15px;
+      left: 15px;
+      background: rgba(0,0,0,0.7);
+      border: 1.5px solid var(--neon-blue);
+      border-radius: 4px;
+      padding: 6px 12px;
+      font-family: var(--font-retro);
+      font-size: 0.9rem;
+      color: var(--neon-blue);
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    /* Secret Value Reveal Modal (One time at start) */
+    .secret-popup-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.9);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+    }
+
+    .secret-card {
+      background: #1b1e2a;
+      border: 4px solid var(--neon-blue);
+      border-radius: 16px;
+      padding: 30px;
+      width: 85%;
+      max-width: 420px;
+      text-align: center;
+      box-shadow: 0 0 30px rgba(0, 229, 255, 0.4);
+      animation: card-appear 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .secret-card-title {
+      font-family: var(--font-retro);
+      font-size: 1.6rem;
+      color: #fff;
+      margin-bottom: 20px;
+      border-bottom: 2px dashed var(--border-color);
+      padding-bottom: 10px;
+    }
+
+    .secret-role-box {
+      font-family: var(--font-retro);
+      font-size: 1.8rem;
+      margin: 15px 0;
+      padding: 10px;
+      border-radius: 8px;
+    }
+
+    .role-citizen {
+      background: rgba(0, 255, 102, 0.1);
+      border: 2px solid var(--neon-green);
+      color: var(--neon-green);
+    }
+
+    .role-mafia {
+      background: rgba(255, 51, 102, 0.1);
+      border: 2px solid var(--neon-red);
+      color: var(--neon-red);
+    }
+
+    .secret-value-box {
+      font-family: var(--font-retro);
+      font-size: 3rem;
+      color: #fff;
+      text-shadow: 0 0 10px #fff;
+      margin: 20px 0;
+    }
+
+    .secret-warning {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 25px;
+      line-height: 1.4;
+    }
+
+    .secret-close-btn {
+      width: 100%;
+      padding: 12px;
+      background: #00e5ff;
+      color: #000;
+      border: none;
+      border-radius: 8px;
+      font-family: var(--font-retro);
+      font-size: 1.1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .secret-close-btn:hover {
+      background: #00b4cc;
+    }
+
+    /* Right Sidebar Panels */
+    .sidebar-panel {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      min-width: 320px;
+      max-width: 380px;
+      min-height: 0;
+    }
+
+    .panel-card {
+      background: var(--panel-bg);
+      border: 2px solid var(--border-color);
+      border-radius: 8px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .panel-title {
+      font-family: var(--font-retro);
+      font-size: 0.95rem;
+      color: var(--text-main);
+      margin-bottom: 8px;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 4px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* Minimap View */
+    .minimap-wrapper {
+      position: relative;
+      height: 170px;
+      background: #0c0d14;
+      border: 1.5px solid var(--border-color);
+      border-radius: 6px;
+      overflow: hidden;
+    }
+
+    #minimap-canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    /* Chat Log View (Current Room) */
+    .chat-log-card {
+      flex: 1;
+      min-height: 120px;
+    }
+
+    .chat-log-box {
+      flex: 1;
+      background: #0c0d14;
+      border: 1.5px solid var(--border-color);
+      border-radius: 6px;
+      padding: 8px;
+      overflow-y: auto;
+      font-size: 0.85rem;
+      font-family: var(--font-retro);
+      line-height: 1.4;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      min-height: 0;
+    }
+
+    .chat-msg-row {
+      word-break: break-all;
+    }
+
+    .chat-name {
+      font-weight: bold;
+    }
+
+    .chat-system {
+      color: var(--neon-yellow);
+    }
+
+    .chat-privacy-alert {
+      color: var(--neon-purple);
+      text-align: center;
+      margin-top: auto;
+      margin-bottom: auto;
+      font-size: 0.8rem;
+      line-height: 1.6;
+    }
+
+    /* Control Panel Cards */
+    .admin-console-card {
+      gap: 8px;
+    }
+
+    .cctv-btn-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+    }
+
+    .cctv-btn {
+      padding: 6px;
+      background: #252838;
+      border: 1.5px solid var(--border-color);
+      border-radius: 4px;
+      color: var(--text-main);
+      font-family: var(--font-retro);
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .cctv-btn:hover {
+      background: #34384e;
+      border-color: var(--neon-blue);
+    }
+
+    .cctv-btn.active {
+      background: rgba(0, 229, 255, 0.15);
+      border-color: var(--neon-blue);
+      color: var(--neon-blue);
+      box-shadow: 0 0 5px rgba(0, 229, 255, 0.3);
+    }
+
+    /* Multiply Action Trigger Button */
+    .multiply-btn {
+      padding: 10px;
+      background: #222;
+      border: 2px solid #555;
+      border-radius: 6px;
+      color: #777;
+      font-family: var(--font-retro);
+      font-size: 1.05rem;
+      font-weight: bold;
+      text-align: center;
+      cursor: not-allowed;
+      transition: all 0.3s;
+    }
+
+    .multiply-btn.active {
+      background: linear-gradient(135deg, #00aa33 0%, #00ff66 100%);
+      border-color: #fff;
+      color: #fff;
+      cursor: pointer;
+      box-shadow: 0 0 15px var(--neon-green);
+      animation: neon-blink 1s infinite alternate;
+    }
+
+    /* Swapper panel */
+    .swapper-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .swapper-select {
+      flex: 1;
+      padding: 5px;
+      background: #222;
+      color: #fff;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      outline: none;
+      font-family: var(--font-retro);
+      font-size: 0.85rem;
+    }
+
+    .call-btn {
+      padding: 5px 10px;
+      background: #333;
+      border: 1px solid #555;
+      border-radius: 4px;
+      color: #fff;
+      font-family: var(--font-retro);
+      font-size: 0.8rem;
+      cursor: pointer;
+    }
+
+    .call-btn:hover {
+      background: #444;
+    }
+
+    /* Firebase Panel */
+    .firebase-details summary {
+      cursor: pointer;
+      font-family: var(--font-retro);
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      user-select: none;
+    }
+
+    .firebase-form {
+      margin-top: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .firebase-row {
+      display: flex;
+      gap: 6px;
+    }
+
+    .firebase-input {
+      flex: 1;
+      padding: 4px 6px;
+      background: #111;
+      border: 1.5px solid var(--border-color);
+      border-radius: 4px;
+      color: #fff;
+      font-size: 0.75rem;
+      outline: none;
+    }
+
+    .firebase-btn {
+      padding: 6px;
+      background: #ff8800;
+      color: #000;
+      border: none;
+      border-radius: 4px;
+      font-family: var(--font-retro);
+      font-size: 0.8rem;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .firebase-status {
+      font-size: 0.75rem;
+      font-family: var(--font-retro);
+      color: var(--neon-yellow);
+      text-align: center;
+    }
+
+    /* Bottom Chat Area (Visible only to Student) */
+    .chat-input-bar {
+      display: flex;
+      background: var(--panel-bg);
+      border: 2px solid var(--border-color);
+      border-radius: 8px;
+      padding: 8px;
+      gap: 8px;
+    }
+
+    .chat-input-field {
+      flex: 1;
+      padding: 10px 14px;
+      background: #0b0c10;
+      border: 1.5px solid var(--border-color);
+      border-radius: 6px;
+      color: #fff;
+      font-size: 0.95rem;
+      outline: none;
+    }
+
+    .chat-input-field:focus {
+      border-color: var(--neon-blue);
+    }
+
+    .chat-send-btn {
+      padding: 0 20px;
+      background: var(--neon-blue);
+      color: #000;
+      border: none;
+      border-radius: 6px;
+      font-family: var(--font-retro);
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .chat-send-btn:hover {
+      background: #00b4cc;
+    }
+
+    /* End Screen Overlay */
+    #end-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(3, 3, 5, 0.95);
+      z-index: 5000;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      overflow-y: auto;
+    }
+
+    .end-container {
+      background: var(--panel-bg);
+      border-radius: 16px;
+      padding: 40px;
+      width: 100%;
+      max-width: 750px;
+      text-align: center;
+      box-shadow: 0 0 50px rgba(0,0,0,0.8);
+      max-height: 90vh;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 25px;
+    }
+
+    .end-result-banner {
+      font-family: var(--font-retro);
+      font-size: 2.8rem;
+      text-shadow: 0 0 15px rgba(255,255,255,0.2);
+    }
+
+    .banner-success {
+      color: var(--neon-green);
+      text-shadow: 0 0 15px var(--neon-green);
+    }
+
+    .banner-fail {
+      color: var(--neon-red);
+      text-shadow: 0 0 15px var(--neon-red);
+    }
+
+    .end-stats {
+      font-family: var(--font-retro);
+      font-size: 1.1rem;
+      color: var(--neon-yellow);
+      background: #0b0c10;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+    }
+
+    .end-section-title {
+      font-family: var(--font-retro);
+      font-size: 1.2rem;
+      color: #fff;
+      text-align: left;
+      margin-bottom: 10px;
+      border-left: 4px solid var(--neon-blue);
+      padding-left: 8px;
+    }
+
+    .end-list-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 8px;
+      margin-bottom: 15px;
+    }
+
+    .end-student-badge {
+      background: #252838;
+      border: 1.5px solid var(--border-color);
+      border-radius: 6px;
+      padding: 8px;
+      font-family: var(--font-retro);
+      font-size: 0.85rem;
+      text-align: center;
+    }
+
+    .end-student-badge.mafia-highlight {
+      border: 1.5px solid var(--neon-red);
+      color: var(--neon-red);
+      background: rgba(255, 51, 102, 0.05);
+    }
+
+    .red-border-box {
+      border: 3px solid var(--neon-red) !important;
+      border-radius: 12px;
+      padding: 20px 15px;
+      background: rgba(255, 51, 102, 0.03);
+      box-shadow: 0 0 15px rgba(255, 51, 102, 0.1);
+    }
+
+    .end-restart-btn {
+      padding: 15px 30px;
+      background: var(--neon-yellow);
+      color: #000;
+      border: none;
+      border-radius: 8px;
+      font-family: var(--font-retro);
+      font-size: 1.2rem;
+      font-weight: bold;
+      cursor: pointer;
+      align-self: center;
+      box-shadow: 0 0 15px rgba(255, 234, 0, 0.3);
+      transition: transform 0.2s;
+    }
+
+    .end-restart-btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 25px rgba(255, 234, 0, 0.5);
+    }
+
+    /* Keyframe Animations */
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      100% { transform: scale(1.02); }
+    }
+
+    @keyframes card-appear {
+      0% { transform: scale(0.7); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    @keyframes neon-blink {
+      0% { opacity: 0.8; }
+      100% { opacity: 1; box-shadow: 0 0 20px var(--neon-green), 0 0 5px var(--neon-green); }
+    }
+
+    /* Float alert above table */
+    .interaction-floating-bubble {
+      position: absolute;
+      bottom: 120px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0, 0, 0, 0.85);
+      border: 2px solid var(--neon-yellow);
+      border-radius: 8px;
+      color: var(--neon-yellow);
+      padding: 10px 20px;
+      font-family: var(--font-retro);
+      font-size: 0.95rem;
+      z-index: 1000;
+      animation: card-appear 0.3s;
+      pointer-events: none;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 1. Lobby Screen -->
+  <div id="lobby-screen">
+    <button class="admin-login-trigger" onclick="openAdminModal()">🔑 관리자 로그인</button>
+    
+    <div class="lobby-header">
+      <h1 class="lobby-title">우리 학교의 목표</h1>
+      <h2 class="lobby-subtitle">1조($2^{40}$)를 만들어야 해!</h2>
+    </div>
+
+    <div class="lobby-box">
+      <div class="lobby-input-group">
+        <label class="lobby-label" for="player-nickname">학생 이름 입력</label>
+        <input type="text" id="player-nickname" class="lobby-input" placeholder="학생 이름을 적어주세요">
+      </div>
+      <button class="lobby-btn" onclick="joinAsStudent()">🎮 게임 참가하기</button>
+    </div>
+  </div>
+
+  <!-- 2. Admin Password Modal -->
+  <div id="admin-modal" class="modal-overlay">
+    <div class="modal-content">
+      <h3 class="modal-title">관리자 액세스 코드</h3>
+      <input type="password" id="admin-password" class="modal-input" placeholder="••••" maxlength="6">
+      <div class="modal-btn-row">
+        <button class="modal-btn confirm" onclick="submitAdminPassword()">확인</button>
+        <button class="modal-btn cancel" onclick="closeAdminModal()">취소</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. Main Game Dashboard -->
+  <div id="game-container">
+    <!-- Game Header Bar -->
+    <header class="game-header">
+      <div class="game-title-info">
+        <span>우리 학교의 목표: 1조를 만들어야 해!</span>
+        <span id="role-badge" class="game-mode-badge badge-student" style="margin-left: 10px;">학생</span>
+      </div>
+      <div class="timer-display" id="game-timer">남은 시간: 10:00</div>
+    </header>
+
+    <!-- Top Billboard -->
+    <section class="billboard-container">
+      <div class="billboard-ticker" id="billboard-status-text">게임 시작 대기 중...</div>
+      <div class="billboard-progress-container">
+        <span class="goal-tag">$2^{0}$</span>
+        <div class="progress-bar-outer">
+          <div class="progress-bar-inner" id="goal-progress-bar"></div>
+          <div class="progress-text" id="goal-progress-text">현재 최댓값: 0 (0.0%)</div>
+        </div>
+        <span class="goal-tag">$2^{40}$ (1조)</span>
+      </div>
+    </section>
+
+    <!-- Dashboard Main Area -->
+    <div class="dashboard-main">
+      <!-- Left Column: Canvas View -->
+      <div class="canvas-wrapper">
+        <div class="room-overlay-banner" id="room-banner">현재 공간: 강당</div>
+        <canvas id="game-canvas" width="780" height="550"></canvas>
+        
+        <!-- One-time Secret Reveal Popup (Student only) -->
+        <div id="secret-reveal" class="secret-popup-overlay" style="display: none;">
+          <div class="secret-card">
+            <h3 class="secret-card-title">당신의 비밀 카드</h3>
+            <p style="font-size: 0.95rem; color: var(--text-main);">게임에 부여된 당신의 신분과 비밀의 값입니다.</p>
+            <div id="secret-role" class="secret-role-box role-citizen">시민 (일반 학생)</div>
+            <div id="secret-value" class="secret-value-box">2</div>
+            <p class="secret-warning">
+              ⚠️ [비밀 카드 확인] 버튼을 눌러 이 창을 닫으면,<br>
+              게임 종료 전까지 본인의 비밀의 값을 절대 다시 확인할 수 없습니다!
+            </p>
+            <button class="secret-close-btn" onclick="closeSecretCard()">비밀 카드 확인 완료</button>
+          </div>
+        </div>
+
+        <!-- Multiplication Success Floating Popup -->
+        <div id="multiply-popup" class="interaction-floating-bubble" style="display: none;">
+          두 학생의 비밀의 값이 각각 상대방의 비밀의 값과 곱해졌습니다.
+        </div>
+      </div>
+
+      <!-- Right Column: Sidebar Dashboard -->
+      <aside class="sidebar-panel">
+        <!-- Minimap Card -->
+        <div class="panel-card">
+          <div class="panel-title">전체 미니맵 (실시간 위치)</div>
+          <div class="minimap-wrapper">
+            <canvas id="minimap-canvas" width="300" height="170"></canvas>
+          </div>
+        </div>
+
+        <!-- Chat Log Card -->
+        <div class="panel-card chat-log-card">
+          <div class="panel-title" id="chat-title">현재 공간 채팅 로그 (강당)</div>
+          <div class="chat-log-box" id="room-chat-log">
+            <!-- Messages go here -->
+          </div>
+        </div>
+
+        <!-- Control Console Card (CCTV & Operations) -->
+        <div class="panel-card admin-console-card">
+          <div class="panel-title">공간 관전 콘솔 (CCTV)</div>
+          <div class="cctv-btn-grid">
+            <button class="cctv-btn active" id="cctv-auditorium" onclick="setCCTV('auditorium')">강당</button>
+            <button class="cctv-btn" id="cctv-class1" onclick="setCCTV('class1')">교실 1</button>
+            <button class="cctv-btn" id="cctv-class2" onclick="setCCTV('class2')">교실 2</button>
+            <button class="cctv-btn" id="cctv-hallway" onclick="setCCTV('hallway')">복도</button>
+            <button class="cctv-btn" id="cctv-toilet" onclick="setCCTV('toilet')">화장실</button>
+            <button class="cctv-btn" id="cctv-storage" onclick="setCCTV('storage')">창고</button>
+          </div>
+          
+          <button class="multiply-btn" id="multiply-action-btn" onclick="triggerMultiply()">곱셈연산 발동</button>
+        </div>
+
+        <!-- Simulated Play Utilities -->
+        <div class="panel-card" style="gap: 8px;">
+          <div class="panel-title">테스트 도구 (로컬 시뮬레이션 전용)</div>
+          <div class="swapper-row">
+            <span style="font-size:0.8rem; font-family: var(--font-retro);">조작 아바타:</span>
+            <select class="swapper-select" id="avatar-swapper" onchange="swapActivePlayer(this.value)">
+              <!-- Options populated dynamically -->
+            </select>
+          </div>
+          <div class="swapper-row">
+            <span style="font-size:0.8rem; font-family: var(--font-retro);">소환 기능:</span>
+            <button class="call-btn" onclick="callNPCToDesk('left')">← 좌측 의자</button>
+            <button class="call-btn" onclick="callNPCToDesk('right')">우측 의자 →</button>
+          </div>
+          <div class="swapper-row" style="margin-top: 4px;">
+            <button class="call-btn" onclick="timeAcceleration()" style="background:#ff3366; flex: 1;">⏱️ 10배속 단축</button>
+            <button class="call-btn" onclick="forceEndGame(true)" style="background:#00bb33; color:#fff;">성공 엔딩</button>
+            <button class="call-btn" onclick="forceEndGame(false)" style="background:#cc2222; color:#fff;">실패 엔딩</button>
+          </div>
+        </div>
+
+        <!-- Firebase Config Card (Collapsible) -->
+        <div class="panel-card">
+          <details class="firebase-details">
+            <summary>🔗 Firebase RTDB 연동 설정</summary>
+            <div class="firebase-form">
+              <input type="text" id="fb-apikey" class="firebase-input" placeholder="API Key">
+              <input type="text" id="fb-dburl" class="firebase-input" placeholder="Database URL">
+              <input type="text" id="fb-projectid" class="firebase-input" placeholder="Project ID">
+              <button class="firebase-btn" onclick="connectFirebase()">Firebase 연결</button>
+            </div>
+          </details>
+          <div class="firebase-status" id="firebase-status-text" style="margin-top: 4px;">네트워크 상태: 로컬 시뮬레이션 모드</div>
+        </div>
+      </aside>
+    </div>
+
+    <!-- Bottom Chat Input Bar (Visible for Student only) -->
+    <div class="chat-input-bar" id="game-chat-bar">
+      <input type="text" id="chat-input" class="chat-input-field" placeholder="말을 입력해보세요 (엔터키 전송)..." maxlength="50" onkeydown="handleChatEnter(event)">
+      <button class="chat-send-btn" onclick="sendChat()">전송</button>
+    </div>
+  </div>
+
+  <!-- 4. Final Ending Overlay Screen -->
+  <div id="end-screen">
+    <div class="end-container">
+      <h1 class="end-result-banner" id="end-banner-text">MISSION VICTORY</h1>
+      
+      <div class="end-stats" id="end-stats-summary">
+        최종 기록: 최댓값 2^24 (16,777,216) | 0 감염자 수: 4명
+      </div>
+
+      <!-- Successful Students Section -->
+      <div id="end-success-container">
+        <h3 class="end-section-title" id="end-success-title">미션에 성공한 학생 명단</h3>
+        <div class="end-list-grid" id="end-success-list">
+          <!-- Filled dynamically -->
+        </div>
+      </div>
+
+      <!-- Failed/Quarantined/Mafia Students Section -->
+      <div id="end-failure-container" class="red-border-box">
+        <h3 class="end-section-title" id="end-failure-title" style="color: var(--neon-red); border-left-color: var(--neon-red);">방해자(마피아) 명단</h3>
+        <div class="end-list-grid" id="end-failure-list">
+          <!-- Filled dynamically -->
+        </div>
+      </div>
+
+      <button class="end-restart-btn" onclick="restartGame()">Lobby로 돌아가기</button>
+    </div>
+  </div>
+
+  <!-- ==================== JavaScript Code ==================== -->
+  <script>
+    // --- 1. Sound Synthesis Engine (Web Audio API) ---
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+    function playSound(type) {
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+      
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      
+      const now = audioCtx.currentTime;
+
+      if (type === 'click') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(400, now);
+        osc.frequency.exponentialRampToValueAtTime(100, now + 0.1);
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+        osc.start(now);
+        osc.stop(now + 0.1);
+      } else if (type === 'success') {
+        // High-pitched retro chime (ascending)
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(300, now);
+        osc.frequency.setValueAtTime(600, now + 0.08);
+        osc.frequency.setValueAtTime(1200, now + 0.16);
+        gain.gain.setValueAtTime(0.3, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+        osc.start(now);
+        osc.stop(now + 0.3);
+      } else if (type === 'fail') {
+        // Low-pitched warning alarm (descending/glitchy)
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(350, now);
+        osc.frequency.exponentialRampToValueAtTime(90, now + 0.4);
+        gain.gain.setValueAtTime(0.3, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+        osc.start(now);
+        osc.stop(now + 0.4);
+      } else if (type === 'beep_high') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(880, now);
+        gain.gain.setValueAtTime(0.15, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+        osc.start(now);
+        osc.stop(now + 0.1);
+      }
+    }
+
+    // --- 2. Game Configurations & Room Layout Bounds ---
+    const MAP_WIDTH = 1000;
+    const MAP_HEIGHT = 1800;
+    const VIEWPORT_WIDTH = 780;
+    const VIEWPORT_HEIGHT = 550;
+
+    const ROOMS = {
+      auditorium: { name: '강당', color: '#161224', x: 200, y: 50, w: 600, h: 600, wallColor: '#2b1c4b' },
+      class1: { name: '교실 1', color: '#0d1624', x: 50, y: 700, w: 300, h: 300, wallColor: '#1a334d' },
+      class2: { name: '교실 2', color: '#0d1624', x: 650, y: 700, w: 300, h: 300, wallColor: '#1a334d' },
+      toilet: { name: '화장실', color: '#0d2222', x: 50, y: 1100, w: 300, h: 300, wallColor: '#1a4040' },
+      storage: { name: '창고', color: '#1f1610', x: 650, y: 1100, w: 300, h: 300, wallColor: '#3c2415' },
+      hallway: { name: '복도', color: '#242018', x: 350, y: 650, w: 300, h: 1100, wallColor: '#4d3a24' }
+    };
+
+    const DOORS = {
+      auditorium: { x1: 450, x2: 550, y: 650, orientation: 'h' },
+      class1: { x: 350, y1: 820, y2: 880, orientation: 'v' },
+      class2: { x: 650, y1: 820, y2: 880, orientation: 'v' },
+      toilet: { x: 350, y1: 1220, y2: 1280, orientation: 'v' },
+      storage: { x: 650, y1: 1220, y2: 1280, orientation: 'v' }
+    };
+
+    const DESK_X = 500;
+    const DESK_Y = 1650;
+    const LEFT_SEAT_X = 450;
+    const LEFT_SEAT_Y = 1650;
+    const RIGHT_SEAT_X = 550;
+    const RIGHT_SEAT_Y = 1650;
+
+    // Names pool for generating 30 students
+    const STUDENT_NAMES = [
+      "홍길동", "김영희", "이철수", "박민수", "최지혜", "정우성", "한지민", "강동원", "송혜교", "유재석",
+      "김태희", "이민호", "박신혜", "현빈", "손예진", "공유", "김고은", "이병헌", "전지현", "조인성",
+      "신민아", "이승기", "수지", "박보검", "아이유", "송중기", "한효주", "소지섭", "김우빈", "정해인"
+    ];
+
+    // --- 3. State Management ---
+    let myId = '';
+    let isAdmin = false;
+    let currentControlledId = ''; // Player currently controlled
+    
+    // Core game database states (contains 30 students)
+    let students = {};
+    let activeCCTV = 'auditorium'; // Focus room when in spectator/CCTV mode
+    let cctvFollowPlayer = true;
+    let timerValue = 600; // 10 minutes in seconds
+    let gameInterval = null;
+    let scanInterval = null;
+    let isGameOver = false;
+
+    // Chat archives per room: { room_id: [ { name, msg, time } ] }
+    let chatArchives = {
+      auditorium: [], class1: [], class2: [], hallway: [], toilet: [], storage: []
+    };
+
+    // Firebase database instances
+    let fbApp = null;
+    let fbDatabase = null;
+    let isFirebaseConnected = false;
+    let fbRoomRef = null;
+
+    // Canvas drawing contexts
+    let canvas, ctx;
+    let minimapCanvas, minimapCtx;
+    let camera = { x: 0, y: 0 };
+    
+    // Key state triggers
+    let keys = {};
+    let localWanderingInterval = null;
+    let multiplyVfxTimer = 0; // Trigger electrical sparkle animations on canvas
+    let multiplySuccessTextTimer = 0;
+    
+    // Initialize standard names list for dashboard swapper
+    function setupAvatarSwapperList() {
+      const swapper = document.getElementById('avatar-swapper');
+      swapper.innerHTML = '';
+      for (let i = 1; i <= 30; i++) {
+        const opt = document.createElement('option');
+        opt.value = `student_${i}`;
+        opt.textContent = `학생 ${i}: ${STUDENT_NAMES[i-1]}`;
+        swapper.appendChild(opt);
+      }
+    }
+
+    // --- 4. Math Logarithmic progress calculation ---
+    function calculateLogProgress(maxVal) {
+      if (maxVal <= 0) return 0;
+      const logVal = Math.log2(maxVal);
+      // Map log scale: 0 to 40
+      const percent = Math.min(100, Math.max(0, (logVal / 40) * 100));
+      return percent;
+    }
+
+    function formatNumber(num) {
+      if (num >= 1000000000000) {
+        return (num / 1000000000000).toFixed(2) + "조";
+      }
+      if (num >= 100000000) {
+        return (num / 100000000).toFixed(2) + "억";
+      }
+      if (num >= 10000) {
+        return (num / 10000).toFixed(2) + "만";
+      }
+      return num.toLocaleString();
+    }
+
+    // --- 5. Collision Detection & Room Constraining Physics ---
+    function moveAndCollide(student, dx, dy) {
+      if (dx === 0 && dy === 0) return;
+      
+      let nx = student.x + dx;
+      let ny = student.y + dy;
+      let r = student.radius;
+      let currentRoom = student.room;
+
+      // Update orientation direction
+      if (Math.abs(dx) > Math.abs(dy)) {
+        student.direction = dx > 0 ? 'right' : 'left';
+      } else {
+        student.direction = dy > 0 ? 'down' : 'up';
+      }
+
+      // Check current room bounding boxes with exception doorways
+      if (currentRoom === 'auditorium') {
+        const bounds = ROOMS.auditorium;
+        let minX = bounds.x + r;
+        let maxX = bounds.x + bounds.w - r;
+        let minY = bounds.y + r;
+        let maxY = bounds.y + bounds.h - r;
+
+        // Doorway transition: Auditorium bottom door (X: 450~550, Y: 650)
+        if (nx >= 450 + r && nx <= 550 - r && ny > maxY) {
+          if (ny >= 650) {
+            student.room = 'hallway';
+          }
+        } else {
+          nx = Math.max(minX, Math.min(maxX, nx));
+          ny = Math.max(minY, Math.min(maxY, ny));
+        }
+      } 
+      else if (currentRoom === 'class1') {
+        const bounds = ROOMS.class1;
+        let minX = bounds.x + r;
+        let maxX = bounds.x + bounds.w - r;
+        let minY = bounds.y + r;
+        let maxY = bounds.y + bounds.h - r;
+
+        // Doorway transition: Right side door (X: 350, Y: 820~880)
+        if (ny >= 820 + r && ny <= 880 - r && nx > maxX) {
+          if (nx >= 350) {
+            student.room = 'hallway';
+          }
+        } else {
+          nx = Math.max(minX, Math.min(maxX, nx));
+          ny = Math.max(minY, Math.min(maxY, ny));
+        }
+      } 
+      else if (currentRoom === 'class2') {
+        const bounds = ROOMS.class2;
+        let minX = bounds.x + r;
+        let maxX = bounds.x + bounds.w - r;
+        let minY = bounds.y + r;
+        let maxY = bounds.y + bounds.h - r;
+
+        // Doorway transition: Left side door (X: 650, Y: 820~880)
+        if (ny >= 820 + r && ny <= 880 - r && nx < minX) {
+          if (nx <= 650) {
+            student.room = 'hallway';
+          }
+        } else {
+          nx = Math.max(minX, Math.min(maxX, nx));
+          ny = Math.max(minY, Math.min(maxY, ny));
+        }
+      } 
+      else if (currentRoom === 'toilet') {
+        const bounds = ROOMS.toilet;
+        let minX = bounds.x + r;
+        let maxX = bounds.x + bounds.w - r;
+        let minY = bounds.y + r;
+        let maxY = bounds.y + bounds.h - r;
+
+        // Doorway transition: Right side door (X: 350, Y: 1220~1280)
+        if (ny >= 1220 + r && ny <= 1280 - r && nx > maxX) {
+          if (nx >= 350) {
+            student.room = 'hallway';
+          }
+        } else {
+          nx = Math.max(minX, Math.min(maxX, nx));
+          ny = Math.max(minY, Math.min(maxY, ny));
+        }
+      } 
+      else if (currentRoom === 'storage') {
+        const bounds = ROOMS.storage;
+        let minX = bounds.x + r;
+        let maxX = bounds.x + bounds.w - r;
+        let minY = bounds.y + r;
+        let maxY = bounds.y + bounds.h - r;
+
+        // Doorway transition: Left side door (X: 650, Y: 1220~1280)
+        if (ny >= 1220 + r && ny <= 1280 - r && nx < minX) {
+          if (nx <= 650) {
+            student.room = 'hallway';
+          }
+        } else {
+          nx = Math.max(minX, Math.min(maxX, nx));
+          ny = Math.max(minY, Math.min(maxY, ny));
+        }
+      } 
+      else if (currentRoom === 'hallway') {
+        const bounds = ROOMS.hallway;
+        let minX = bounds.x + r;
+        let maxX = bounds.x + bounds.w - r;
+        let minY = bounds.y + r;
+        let maxY = bounds.y + bounds.h - r;
+
+        // Door check 1: Auditorium entry (Y: 650, X: 450~550)
+        if (nx >= 450 + r && nx <= 550 - r && ny < minY) {
+          if (ny <= 650) {
+            student.room = 'auditorium';
+          }
+        } 
+        // Door check 2: Classroom 1 entry (X: 350, Y: 820~880)
+        else if (ny >= 820 + r && ny <= 880 - r && nx < minX) {
+          if (nx <= 350) {
+            student.room = 'class1';
+          }
+        } 
+        // Door check 3: Classroom 2 entry (X: 650, Y: 820~880)
+        else if (ny >= 820 + r && ny <= 880 - r && nx > maxX) {
+          if (nx >= 650) {
+            student.room = 'class2';
+          }
+        } 
+        // Door check 4: Restroom entry (X: 350, Y: 1220~1280)
+        else if (ny >= 1220 + r && ny <= 1280 - r && nx < minX) {
+          if (nx <= 350) {
+            student.room = 'toilet';
+          }
+        } 
+        // Door check 5: Storage entry (X: 650, Y: 1220~1280)
+        else if (ny >= 1220 + r && ny <= 1280 - r && nx > maxX) {
+          if (nx >= 650) {
+            student.room = 'storage';
+          }
+        } 
+        else {
+          nx = Math.max(minX, Math.min(maxX, nx));
+          ny = Math.max(minY, Math.min(maxY, ny));
+        }
+      }
+
+      student.x = nx;
+      student.y = ny;
+
+      // Sync to Firebase if connected and this is my controlled player
+      if (isFirebaseConnected && student.id === currentControlledId) {
+        fbRoomRef.child('users').child(student.id).update({
+          x: student.x,
+          y: student.y,
+          currentRoom: student.room,
+          direction: student.direction
+        });
+      }
+    }
+
+    // --- 6. Lobby & Login Rules ---
+    function openAdminModal() {
+      playSound('click');
+      document.getElementById('admin-modal').style.display = 'flex';
+      document.getElementById('admin-password').focus();
+    }
+
+    function closeAdminModal() {
+      playSound('click');
+      document.getElementById('admin-modal').style.display = 'none';
+      document.getElementById('admin-password').value = '';
+    }
+
+    function submitAdminPassword() {
+      const pass = document.getElementById('admin-password').value;
+      if (pass === '2525') {
+        playSound('success');
+        isAdmin = true;
+        closeAdminModal();
+        enterGame();
+      } else {
+        playSound('fail');
+        alert('비밀번호가 올바르지 않습니다. (비밀번호: 2525)');
+        document.getElementById('admin-password').value = '';
+      }
+    }
+
+    function joinAsStudent() {
+      playSound('click');
+      const nickname = document.getElementById('player-nickname').value.trim();
+      
+      // Auto-assign username if empty
+      myId = 'student_1'; // Local play controlled by student_1 by default
+      if (nickname) {
+        STUDENT_NAMES[0] = nickname;
+      }
+      
+      isAdmin = false;
+      enterGame();
+    }
+
+    function enterGame() {
+      document.getElementById('lobby-screen').style.display = 'none';
+      document.getElementById('game-container').style.display = 'flex';
+      
+      // Setup elements
+      setupAvatarSwapperList();
+      
+      // Setup HTML Canvas element
+      canvas = document.getElementById('game-canvas');
+      ctx = canvas.getContext('2d');
+      minimapCanvas = document.getElementById('minimap-canvas');
+      minimapCtx = minimapCanvas.getContext('2d');
+
+      // Initialize students list
+      initializeAllParticipants();
+
+      // UI state adjustments based on Mode
+      const badge = document.getElementById('role-badge');
+      const chatBar = document.getElementById('game-chat-bar');
+      const chatTitle = document.getElementById('chat-title');
+      const chatLogBox = document.getElementById('room-chat-log');
+      
+      if (isAdmin) {
+        badge.textContent = "관리자";
+        badge.className = "game-mode-badge badge-admin";
+        chatBar.style.display = 'none'; // Admin cannot chat
+        chatTitle.textContent = "대화 기록 모니터링 불가";
+        chatLogBox.innerHTML = '<div class="chat-privacy-alert">🔒 [관리자 보호 모드]<br>학생들의 대화 내용은 관찰할 수 없습니다.</div>';
+        
+        // Admin camera setup
+        cctvFollowPlayer = false;
+        activeCCTV = 'auditorium';
+      } else {
+        badge.textContent = "학생";
+        badge.className = "game-mode-badge badge-student";
+        chatBar.style.display = 'flex';
+        
+        // Show Secret Value Reveal Popup (Exactly once)
+        showSecretCardPopup();
+        cctvFollowPlayer = true;
+      }
+
+      // Initialize game loop timers
+      startGameTimers();
+      
+      // Setup Event Listeners for controls
+      window.addEventListener('keydown', handleKeyDown);
+      window.addEventListener('keyup', handleKeyUp);
+      
+      // Local AI behavior
+      startLocalWandering();
+
+      // Run visual loops
+      requestAnimationFrame(gameLoop);
+    }
+
+    function initializeAllParticipants() {
+      // 30 participants
+      // 10% are mafias (3 out of 30, indices e.g., 5, 12, 23)
+      const mafiaIndices = [5, 12, 23]; // Fixed index array for repeatable local test
+      students = {};
+      
+      for (let i = 1; i <= 30; i++) {
+        const id = `student_${i}`;
+        const name = STUDENT_NAMES[i-1];
+        const isMafia = mafiaIndices.includes(i);
+        
+        // Generate a random distinct neon pixel color
+        const color = `hsl(${(i * 12) % 360}, 90%, 60%)`;
+        
+        // Distribute starting positions inside the Auditorium: X in [300, 700], Y in [200, 500]
+        const sx = 300 + ((i % 6) * 70) + Math.random() * 20;
+        const sy = 150 + (Math.floor(i / 6) * 70) + Math.random() * 20;
+
+        students[id] = {
+          id: id,
+          name: name,
+          isPlayer: false,
+          isMafia: isMafia,
+          secretValue: isMafia ? 0 : 2,
+          color: color,
+          x: sx,
+          y: sy,
+          room: 'auditorium',
+          direction: 'down',
+          radius: 13,
+          speed: 4.5,
+          chatBubble: '',
+          chatBubbleTimer: 0
+        };
+      }
+
+      // Setup default active controller
+      currentControlledId = 'student_1';
+      students['student_1'].isPlayer = true;
+    }
+
+    // --- 7. Secret Card popup trigger ---
+    function showSecretCardPopup() {
+      const modal = document.getElementById('secret-reveal');
+      const roleBox = document.getElementById('secret-role');
+      const valBox = document.getElementById('secret-value');
+      
+      const me = students[currentControlledId];
+      if (me.isMafia) {
+        roleBox.textContent = "방해자 (마피아)";
+        roleBox.className = "secret-role-box role-mafia";
+        valBox.textContent = "0";
+      } else {
+        roleBox.textContent = "일반 학생 (시민)";
+        roleBox.className = "secret-role-box role-citizen";
+        valBox.textContent = "2";
+      }
+      
+      modal.style.display = 'flex';
+    }
+
+    // Close secret modal
+    function closeSecretCard() {
+      playSound('beep_high');
+      document.getElementById('secret-reveal').style.display = 'none';
+      updateBillboardUI();
+    }
+
+    // --- 8. Swapping controlled characters (Debug tools) ---
+    function swapActivePlayer(id) {
+      playSound('click');
+      // Reset old player status
+      if (students[currentControlledId]) {
+        students[currentControlledId].isPlayer = false;
+      }
+      
+      currentControlledId = id;
+      students[id].isPlayer = true;
+
+      // Update role badge and chat bars in UI
+      const badge = document.getElementById('role-badge');
+      if (!isAdmin) {
+        badge.textContent = `학생 (${students[id].name})`;
+        // Let player see role one time again if swapping to keep tracking simple in local mode
+        showSecretCardPopup();
+      }
+      
+      // Refresh chat logs to show messages from the new room the character is in
+      refreshChatDisplay();
+    }
+
+    // --- 9. Local AI Wander Logic ---
+    function startLocalWandering() {
+      if (localWanderingInterval) clearInterval(localWanderingInterval);
+      
+      localWanderingInterval = setInterval(() => {
+        // Only run for non-controlled characters, and when not in Firebase sync mode
+        if (isFirebaseConnected) return;
+
+        for (const id in students) {
+          const s = students[id];
+          if (s.id === currentControlledId && !isAdmin) continue; // Keep player still unless keyboard inputs
+          
+          // Random decision: move, chat, or transition
+          if (Math.random() < 0.25) {
+            // Decide a random displacement
+            s.vx = (Math.random() - 0.5) * s.speed;
+            s.vy = (Math.random() - 0.5) * s.speed;
+            
+            // Random chat phrase
+            if (Math.random() < 0.05) {
+              const chatPhrases = [
+                "1조 언제 만들어?", "비밀번호 알아?", "나 2 곱했어!", "마피아 누구냐?", 
+                "복도 연산대로 모이자", "화장실 같이 가실 분", "비밀값 궁금하다", "0 있으면 말해줘"
+              ];
+              triggerBubbleChat(s.id, chatPhrases[Math.floor(Math.random() * chatPhrases.length)]);
+            }
+          }
+        }
+      }, 800);
+    }
+
+    // --- 10. Event Keyboard Handlers ---
+    function handleKeyDown(e) {
+      if (e.key === 'Tab') {
+        e.preventDefault();
+        // Cycle controlled avatar index (1 to 30)
+        let idx = parseInt(currentControlledId.split('_')[1]);
+        idx = (idx % 30) + 1;
+        document.getElementById('avatar-swapper').value = `student_${idx}`;
+        swapActivePlayer(`student_${idx}`);
+      }
+      keys[e.key] = true;
+    }
+
+    function handleKeyUp(e) {
+      keys[e.key] = false;
+    }
+
+    // --- 11. Speech Bubble Chat Logic & Spatial Isolation ---
+    function handleChatEnter(e) {
+      if (e.key === 'Enter') {
+        sendChat();
+      }
+    }
+
+    function sendChat() {
+      const input = document.getElementById('chat-input');
+      const text = input.value.trim();
+      if (!text) return;
+      
+      input.value = '';
+      
+      // Broadcast bubble
+      triggerBubbleChat(currentControlledId, text);
+
+      // Sync to Firebase if connected
+      if (isFirebaseConnected) {
+        fbRoomRef.child('users').child(currentControlledId).update({
+          msg: text,
+          msgTime: Date.now()
+        });
+        
+        // Write to global chat history node if Firebase handles it
+        fbRoomRef.child('chat').push({
+          sender: students[currentControlledId].name,
+          msg: text,
+          room: students[currentControlledId].room,
+          time: Date.now()
+        });
+      }
+    }
+
+    function triggerBubbleChat(userId, text) {
+      const s = students[userId];
+      if (!s) return;
+
+      s.chatBubble = text;
+      s.chatBubbleTimer = 180; // 3 seconds at 60 FPS
+
+      // Save to spatial chat log archive
+      const room = s.room;
+      if (chatArchives[room]) {
+        chatArchives[room].push({
+          name: s.name,
+          msg: text,
+          time: new Date().toLocaleTimeString('ko-KR', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' })
+        });
+        
+        // Keep log size clean
+        if (chatArchives[room].length > 40) {
+          chatArchives[room].shift();
+        }
+      }
+      
+      // Update UI chat display if viewing matching room
+      refreshChatDisplay();
+    }
+
+    function refreshChatDisplay() {
+      if (isAdmin) return; // Admin has chat completely locked out
+      
+      const me = students[currentControlledId];
+      if (!me) return;
+      
+      const currentRoom = me.room;
+      const chatLogBox = document.getElementById('room-chat-log');
+      const chatTitle = document.getElementById('chat-title');
+      
+      const roomName = ROOMS[currentRoom].name;
+      chatTitle.textContent = `현재 공간 대화 로그 (${roomName})`;
+      
+      chatLogBox.innerHTML = '';
+      const archive = chatArchives[currentRoom] || [];
+      archive.forEach(item => {
+        const row = document.createElement('div');
+        row.className = 'chat-msg-row';
+        row.innerHTML = `<span class="chat-system">[${item.time}]</span> <span class="chat-name">${item.name}</span>: ${item.msg}`;
+        chatLogBox.appendChild(row);
+      });
+      chatLogBox.scrollTop = chatLogBox.scrollHeight;
+    }
+
+    // --- 12. CCTV Spectating snaps ---
+    function setCCTV(room) {
+      playSound('click');
+      
+      // Deactivate all CCTV buttons
+      const buttons = document.querySelectorAll('.cctv-btn');
+      buttons.forEach(btn => btn.classList.remove('active'));
+      
+      // Activate this button
+      const activeBtn = document.getElementById(`cctv-${room}`);
+      if (activeBtn) activeBtn.classList.add('active');
+
+      activeCCTV = room;
+      cctvFollowPlayer = false; // Turn off follow in spectator mode
+
+      // Banner update
+      document.getElementById('room-banner').textContent = `현재 공간: ${ROOMS[room].name} (CCTV 관전 중)`;
+    }
+
+    // --- 13. Game Loops and Canvas Renderings ---
+    function gameLoop() {
+      updatePhysics();
+      drawGame();
+      requestAnimationFrame(gameLoop);
+    }
+
+    function updatePhysics() {
+      // 1. Move Player by keyboard if Student Mode
+      if (!isAdmin && students[currentControlledId]) {
+        let dx = 0;
+        let dy = 0;
+        const player = students[currentControlledId];
+
+        if (keys['ArrowUp'] || keys['w'] || keys['W']) dy = -player.speed;
+        if (keys['ArrowDown'] || keys['s'] || keys['S']) dy = player.speed;
+        if (keys['ArrowLeft'] || keys['a'] || keys['A']) dx = -player.speed;
+        if (keys['ArrowRight'] || keys['d'] || keys['D']) dx = player.speed;
+
+        moveAndCollide(player, dx, dy);
+      }
+
+      // 2. Move NPCs locally if not connected to Firebase
+      if (!isFirebaseConnected) {
+        for (const id in students) {
+          const s = students[id];
+          if (s.id === currentControlledId && !isAdmin) continue;
+          
+          if (s.vx || s.vy) {
+            moveAndCollide(s, s.vx || 0, s.vy || 0);
+            
+            // Slowly decay speed or stop
+            if (Math.random() < 0.08) {
+              s.vx = 0;
+              s.vy = 0;
+            }
+          }
+        }
+      }
+
+      // 3. Decrement chat timers
+      for (const id in students) {
+        const s = students[id];
+        if (s.chatBubbleTimer > 0) {
+          s.chatBubbleTimer--;
+          if (s.chatBubbleTimer === 0) {
+            s.chatBubble = '';
+          }
+        }
+      }
+
+      // 4. Update camera view
+      if (cctvFollowPlayer && students[currentControlledId]) {
+        const player = students[currentControlledId];
+        camera.x = player.x - VIEWPORT_WIDTH / 2;
+        camera.y = player.y - VIEWPORT_HEIGHT / 2;
+        
+        // Clamps
+        camera.x = Math.max(0, Math.min(MAP_WIDTH - VIEWPORT_WIDTH, camera.x));
+        camera.y = Math.max(0, Math.min(MAP_HEIGHT - VIEWPORT_HEIGHT, camera.y));
+        
+        document.getElementById('room-banner').textContent = `현재 공간: ${ROOMS[player.room].name}`;
+      } else {
+        // Focus on active CCTV room center
+        const r = ROOMS[activeCCTV];
+        const targetX = r.x + r.w / 2 - VIEWPORT_WIDTH / 2;
+        const targetY = r.y + r.h / 2 - VIEWPORT_HEIGHT / 2;
+        
+        // Smooth slide camera or snap
+        camera.x = targetX;
+        camera.y = targetY;
+        camera.x = Math.max(0, Math.min(MAP_WIDTH - VIEWPORT_WIDTH, camera.x));
+        camera.y = Math.max(0, Math.min(MAP_HEIGHT - VIEWPORT_HEIGHT, camera.y));
+      }
+
+      // 5. Evaluate desk condition for Multiply Trigger
+      checkMultiplyDeskCondition();
+
+      // Timers decay
+      if (multiplyVfxTimer > 0) multiplyVfxTimer--;
+      if (multiplySuccessTextTimer > 0) {
+        multiplySuccessTextTimer--;
+        if (multiplySuccessTextTimer === 0) {
+          document.getElementById('multiply-popup').style.display = 'none';
+        }
+      }
+    }
+
+    function checkMultiplyDeskCondition() {
+      let leftStudent = null;
+      let rightStudent = null;
+
+      // Scan all students near seat coordinates
+      for (const id in students) {
+        const s = students[id];
+        if (s.room !== 'hallway') continue;
+
+        // Seat distance tolerance
+        const distL = Math.hypot(s.x - LEFT_SEAT_X, s.y - LEFT_SEAT_Y);
+        const distR = Math.hypot(s.x - RIGHT_SEAT_X, s.y - RIGHT_SEAT_Y);
+
+        if (distL < 20 && s.direction === 'right') {
+          leftStudent = s;
+        }
+        if (distR < 20 && s.direction === 'left') {
+          rightStudent = s;
+        }
+      }
+
+      const btn = document.getElementById('multiply-action-btn');
+      if (leftStudent && rightStudent && leftStudent.id !== rightStudent.id) {
+        btn.classList.add('active');
+        btn.disabled = false;
+        
+        // Save references globally to interact
+        window.deskUserA = leftStudent;
+        window.deskUserB = rightStudent;
+      } else {
+        btn.classList.remove('active');
+        btn.disabled = true;
+        window.deskUserA = null;
+        window.deskUserB = null;
+      }
+    }
+
+    // --- 14. Canvas Drawings (Retro Art) ---
+    function drawGame() {
+      ctx.clearRect(0, 0, VIEWPORT_WIDTH, VIEWPORT_HEIGHT);
+      
+      ctx.save();
+      // Apply camera translate
+      ctx.translate(-camera.x, -camera.y);
+
+      // 1. Draw entire school base floor & grid lines
+      ctx.fillStyle = '#050508';
+      ctx.fillRect(0, 0, MAP_WIDTH, MAP_HEIGHT);
+      
+      // Draw grid floor lines
+      ctx.strokeStyle = '#12131a';
+      ctx.lineWidth = 1;
+      for (let x = 0; x < MAP_WIDTH; x += 50) {
+        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, MAP_HEIGHT); ctx.stroke();
+      }
+      for (let y = 0; y < MAP_HEIGHT; y += 50) {
+        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(MAP_WIDTH, y); ctx.stroke();
+      }
+
+      // 2. Render Room Areas
+      for (const key in ROOMS) {
+        const r = ROOMS[key];
+        ctx.fillStyle = r.color;
+        ctx.fillRect(r.x, r.y, r.w, r.h);
+
+        // Draw double line border for walls
+        ctx.strokeStyle = r.wallColor;
+        ctx.lineWidth = 4;
+        ctx.strokeRect(r.x, r.y, r.w, r.h);
+        
+        // Fill room title
+        ctx.fillStyle = r.wallColor;
+        ctx.font = '20px DungGeunMo';
+        ctx.fillText(r.name, r.x + 20, r.y + 35);
+      }
+
+      // 3. Clear Doorway lines in walls to represent openings
+      ctx.lineWidth = 6;
+      ctx.strokeStyle = '#242018'; // Hallway floor color (door matches hallway)
+      
+      for (const k in DOORS) {
+        const d = DOORS[k];
+        ctx.beginPath();
+        if (d.orientation === 'h') {
+          ctx.moveTo(d.x1, d.y);
+          ctx.lineTo(d.x2, d.y);
+        } else {
+          ctx.moveTo(d.x, d.y1);
+          ctx.lineTo(d.x, d.y2);
+        }
+        ctx.stroke();
+      }
+
+      // 4. Draw Computation Desk Graphics (Bottom hallway)
+      drawComputationDesk();
+
+      // 5. Draw Electrical sparks if multiply occurred
+      if (multiplyVfxTimer > 0) {
+        drawSparkles(DESK_X, DESK_Y);
+      }
+
+      // 6. Draw Characters (Filter by spatial visibility)
+      const visibleRoom = cctvFollowPlayer ? (students[currentControlledId] ? students[currentControlledId].room : 'auditorium') : activeCCTV;
+
+      for (const id in students) {
+        const s = students[id];
+        // Spatial Isolation: Only draw characters in the visible room
+        if (s.room === visibleRoom) {
+          drawCharacter(s);
+        }
+      }
+
+      // 7. Draw Speech Bubbles (Spatial check and Admin block check)
+      if (!isAdmin) { // Admin cannot see speech bubbles
+        for (const id in students) {
+          const s = students[id];
+          if (s.room === visibleRoom && s.chatBubble) {
+            drawChatBubble(s);
+          }
+        }
+      }
+
+      ctx.restore();
+
+      // 8. Draw Minimap separately
+      drawMinimap();
+    }
+
+    function drawComputationDesk() {
+      // Draw left seat
+      ctx.fillStyle = '#ff3366';
+      ctx.fillRect(LEFT_SEAT_X - 10, LEFT_SEAT_Y - 10, 20, 20);
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = 1.5;
+      ctx.strokeRect(LEFT_SEAT_X - 10, LEFT_SEAT_Y - 10, 20, 20);
+
+      // Draw right seat
+      ctx.fillStyle = '#00ff66';
+      ctx.fillRect(RIGHT_SEAT_X - 10, RIGHT_SEAT_Y - 10, 20, 20);
+      ctx.strokeRect(RIGHT_SEAT_X - 10, RIGHT_SEAT_Y - 10, 20, 20);
+
+      // Draw table block
+      ctx.fillStyle = '#4a2c11';
+      ctx.fillRect(DESK_X - 25, DESK_Y - 15, 50, 30);
+      ctx.strokeStyle = '#c68a4c';
+      ctx.strokeRect(DESK_X - 25, DESK_Y - 15, 50, 30);
+
+      // Glowing display screen on desk
+      const glow = (Math.sin(Date.now() / 200) + 1) / 2;
+      ctx.fillStyle = `rgba(0, 229, 255, ${0.4 + glow * 0.5})`;
+      ctx.fillRect(DESK_X - 10, DESK_Y - 8, 20, 16);
+      
+      // Text "X"
+      ctx.fillStyle = '#fff';
+      ctx.font = '10px DungGeunMo';
+      ctx.fillText('×', DESK_X - 4, DESK_Y + 4);
+    }
+
+    function drawSparkles(x, y) {
+      for (let i = 0; i < 15; i++) {
+        const px = x + (Math.random() - 0.5) * 120;
+        const py = y + (Math.random() - 0.5) * 80;
+        const size = 3 + Math.random() * 5;
+        
+        ctx.fillStyle = i % 2 === 0 ? varColor('--neon-blue') : varColor('--neon-green');
+        ctx.fillRect(px - size/2, py - size/2, size, size);
+      }
+    }
+
+    function varColor(cssVar) {
+      return getComputedStyle(document.documentElement).getPropertyValue(cssVar).trim();
+    }
+
+    function drawCharacter(s) {
+      // 1. Shadow underneath
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+      ctx.beginPath();
+      ctx.ellipse(s.x, s.y + 12, s.radius * 0.9, 6, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Highlight active controlled avatar ring
+      if (s.id === currentControlledId && !isAdmin) {
+        ctx.strokeStyle = varColor('--neon-yellow');
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.ellipse(s.x, s.y + 12, s.radius * 1.2, 8, 0, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+
+      // 2. Character body
+      ctx.fillStyle = s.color;
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.radius, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#000';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // 3. Head & Hair details
+      ctx.fillStyle = '#ffdbac'; // Skin tone
+      ctx.beginPath();
+      ctx.arc(s.x, s.y - 4, s.radius * 0.75, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      // Face direction features
+      ctx.fillStyle = '#000';
+      if (s.direction === 'left') {
+        ctx.fillRect(s.x - 7, s.y - 6, 2, 3); // Left eye
+        // Hair back
+        ctx.fillStyle = '#222';
+        ctx.fillRect(s.x + 3, s.y - 12, 6, 12);
+      } else if (s.direction === 'right') {
+        ctx.fillRect(s.x + 5, s.y - 6, 2, 3); // Right eye
+        // Hair back
+        ctx.fillStyle = '#222';
+        ctx.fillRect(s.x - 9, s.y - 12, 6, 12);
+      } else if (s.direction === 'up') {
+        // Back of head (all hair)
+        ctx.fillStyle = '#222';
+        ctx.beginPath();
+        ctx.arc(s.x, s.y - 5, s.radius * 0.75, Math.PI, 0);
+        ctx.fill();
+      } else { // Down (facing player)
+        ctx.fillRect(s.x - 3, s.y - 6, 2, 3); // Left eye
+        ctx.fillRect(s.x + 2, s.y - 6, 2, 3); // Right eye
+      }
+
+      // Name banner above head
+      ctx.fillStyle = '#fff';
+      ctx.font = '11px DungGeunMo';
+      ctx.textAlign = 'center';
+      
+      const dispName = s.id === currentControlledId ? `[나] ${s.name}` : s.name;
+      ctx.fillText(dispName, s.x, s.y - s.radius - 8);
+    }
+
+    function drawChatBubble(s) {
+      const text = s.chatBubble;
+      ctx.font = '12px DungGeunMo';
+      const textWidth = ctx.measureText(text).width;
+      
+      const padX = 10;
+      const padY = 6;
+      const boxW = textWidth + padX * 2;
+      const boxH = 16 + padY * 2;
+      const bx = s.x - boxW / 2;
+      const by = s.y - s.radius - 40;
+
+      // Draw bubble background
+      ctx.fillStyle = '#fff';
+      ctx.strokeStyle = '#000';
+      ctx.lineWidth = 1.5;
+      
+      ctx.beginPath();
+      ctx.roundRect(bx, by, boxW, boxH, 6);
+      ctx.fill();
+      ctx.stroke();
+
+      // Tail triangle
+      ctx.beginPath();
+      ctx.moveTo(s.x - 6, by + boxH);
+      ctx.lineTo(s.x, by + boxH + 6);
+      ctx.lineTo(s.x + 6, by + boxH);
+      ctx.fillStyle = '#fff';
+      ctx.fill();
+      
+      ctx.beginPath();
+      ctx.moveTo(s.x - 6, by + boxH);
+      ctx.lineTo(s.x, by + boxH + 6);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(s.x, by + boxH + 6);
+      ctx.lineTo(s.x + 6, by + boxH);
+      ctx.stroke();
+
+      // Render text
+      ctx.fillStyle = '#000';
+      ctx.textAlign = 'center';
+      ctx.fillText(text, s.x, by + padY + 12);
+    }
+
+    // --- 15. Minimap Render ---
+    function drawMinimap() {
+      minimapCtx.clearRect(0, 0, 300, 170);
+
+      const scaleX = 0.27;
+      const scaleY = 0.085;
+      const ox = 15;
+      const oy = 8;
+
+      // Draw rooms
+      for (const k in ROOMS) {
+        const r = ROOMS[k];
+        const rx = r.x * scaleX + ox;
+        const ry = r.y * scaleY + oy;
+        const rw = r.w * scaleX;
+        const rh = r.h * scaleY;
+
+        minimapCtx.fillStyle = '#151624';
+        minimapCtx.fillRect(rx, ry, rw, rh);
+        minimapCtx.strokeStyle = '#32364c';
+        minimapCtx.lineWidth = 1.5;
+        minimapCtx.strokeRect(rx, ry, rw, rh);
+
+        minimapCtx.fillStyle = '#515878';
+        minimapCtx.font = '9px DungGeunMo';
+        minimapCtx.fillText(r.name[0] + (r.name[1] || ''), rx + 4, ry + 12);
+      }
+
+      // Draw Desk
+      minimapCtx.fillStyle = varColor('--neon-yellow');
+      minimapCtx.fillRect(DESK_X * scaleX + ox - 4, DESK_Y * scaleY + oy - 2, 8, 4);
+
+      // Draw character dots
+      const visibleRoom = cctvFollowPlayer ? (students[currentControlledId] ? students[currentControlledId].room : 'auditorium') : activeCCTV;
+      
+      for (const id in students) {
+        const s = students[id];
+        const px = s.x * scaleX + ox;
+        const py = s.y * scaleY + oy;
+
+        const isSameRoom = s.room === visibleRoom;
+        
+        if (s.id === currentControlledId && !isAdmin) {
+          minimapCtx.fillStyle = (Math.floor(Date.now() / 150) % 2 === 0) ? '#ffcc00' : '#ffffff';
+          minimapCtx.beginPath();
+          minimapCtx.arc(px, py, 4, 0, Math.PI * 2);
+          minimapCtx.fill();
+        } else {
+          minimapCtx.fillStyle = isSameRoom ? s.color : '#444';
+          minimapCtx.beginPath();
+          minimapCtx.arc(px, py, 2.5, 0, Math.PI * 2);
+          minimapCtx.fill();
+        }
+      }
+
+      // Draw camera viewport bounds
+      const vx = camera.x * scaleX + ox;
+      const vy = camera.y * scaleY + oy;
+      const vw = VIEWPORT_WIDTH * scaleX;
+      const vh = VIEWPORT_HEIGHT * scaleY;
+      
+      minimapCtx.strokeStyle = 'rgba(255, 51, 102, 0.7)';
+      minimapCtx.lineWidth = 1;
+      minimapCtx.strokeRect(vx, vy, vw, vh);
+    }
+
+    // --- 16. Multiplication Core System ---
+    function triggerMultiply() {
+      if (!window.deskUserA || !window.deskUserB) return;
+      
+      const userA = window.deskUserA;
+      const userB = window.deskUserB;
+      
+      if (isFirebaseConnected) {
+        fbRoomRef.child('interaction').update({
+          triggerMultiplication: true,
+          userA_id: userA.id,
+          userB_id: userB.id,
+          timestamp: Date.now()
+        });
+      } else {
+        executeMultiplication(userA.id, userB.id);
+      }
+    }
+
+    function executeMultiplication(idA, idB) {
+      const uA = students[idA];
+      const uB = students[idB];
+      
+      if (!uA || !uB) return;
+
+      const oldValA = uA.secretValue;
+      const oldValB = uB.secretValue;
+
+      let newVal = 0;
+      let infected = false;
+
+      if (uA.isMafia || uB.isMafia || oldValA === 0 || oldValB === 0) {
+        newVal = 0;
+        infected = true;
+      } else {
+        newVal = oldValA * oldValB;
+      }
+
+      uA.secretValue = newVal;
+      uB.secretValue = newVal;
+
+      multiplyVfxTimer = 45;
+
+      if (infected) {
+        playSound('fail');
+        if (oldValA !== 0) triggerBubbleChat(uA.id, "윽! 비밀의 값이 0이 되었어!");
+        if (oldValB !== 0) triggerBubbleChat(uB.id, "어라? 왜 0으로 변한 거지?");
+      } else {
+        playSound('success');
+      }
+
+      const isPartInvolved = (currentControlledId === idA || currentControlledId === idB);
+      if (isPartInvolved && !isAdmin) {
+        document.getElementById('multiply-popup').style.display = 'block';
+        multiplySuccessTextTimer = 180;
+      }
+
+      updateBillboardUI();
+      
+      if (isFirebaseConnected) {
+        fbRoomRef.child('users').child(idA).update({ secretValue: newVal });
+        fbRoomRef.child('users').child(idB).update({ secretValue: newVal });
+        fbRoomRef.child('interaction').update({ triggerMultiplication: false });
+      }
+    }
+
+    // --- 17. Summon NPC cheat helper ---
+    function callNPCToDesk(side) {
+      playSound('click');
+      const swapper = document.getElementById('avatar-swapper');
+      const targetId = swapper.value;
+      
+      const s = students[targetId];
+      if (!s) return;
+
+      s.room = 'hallway';
+      if (side === 'left') {
+        s.x = LEFT_SEAT_X;
+        s.y = LEFT_SEAT_Y;
+        s.direction = 'right';
+      } else {
+        s.x = RIGHT_SEAT_X;
+        s.y = RIGHT_SEAT_Y;
+        s.direction = 'left';
+      }
+
+      if (isFirebaseConnected) {
+        fbRoomRef.child('users').child(targetId).update({
+          x: s.x,
+          y: s.y,
+          currentRoom: s.room,
+          direction: s.direction
+        });
+      }
+    }
+
+    // --- 18. Timers & Billboard Updates ---
+    function startGameTimers() {
+      if (gameInterval) clearInterval(gameInterval);
+      if (scanInterval) clearInterval(scanInterval);
+
+      timerValue = 600;
+      isGameOver = false;
+
+      gameInterval = setInterval(() => {
+        if (timerValue > 0) {
+          timerValue--;
+          updateClockUI();
+          
+          if (timerValue <= 30 && timerValue % 2 === 0) {
+            playSound('beep_high');
+          }
+        } else {
+          clearInterval(gameInterval);
+          clearInterval(scanInterval);
+          finishGame();
+        }
+      }, 1000);
+
+      scanInterval = setInterval(() => {
+        performPeriodicDataScan();
+      }, 120000); // 2 minutes
+      
+      updateBillboardUI();
+    }
+
+    function updateClockUI() {
+      const minutes = Math.floor(timerValue / 60);
+      const seconds = timerValue % 60;
+      const formatTime = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+      
+      const display = document.getElementById('game-timer');
+      display.textContent = `남은 시간: ${formatTime}`;
+      
+      if (timerValue <= 60) {
+        display.style.color = varColor('--neon-red');
+      } else {
+        display.style.color = '';
+      }
+    }
+
+    function timeAcceleration() {
+      playSound('beep_high');
+      timerValue = Math.max(5, timerValue - 100);
+      updateClockUI();
+      performPeriodicDataScan();
+    }
+
+    function performPeriodicDataScan() {
+      playSound('beep_high');
+      
+      let maxVal = 0;
+      let zeroCount = 0;
+      
+      for (const id in students) {
+        const s = students[id];
+        if (s.secretValue > maxVal) {
+          maxVal = s.secretValue;
+        }
+        if (s.secretValue === 0) {
+          zeroCount++;
+        }
+      }
+
+      const ticker = document.getElementById('billboard-status-text');
+      const scanMessage = `[🚨 전광판 스캔 완료] 최고 비밀값: ${formatNumber(maxVal)} | 감염자 수(0 보유): ${zeroCount}명`;
+      ticker.textContent = scanMessage;
+      
+      const billboard = document.querySelector('.billboard-container');
+      billboard.style.borderColor = varColor('--neon-yellow');
+      setTimeout(() => {
+        billboard.style.borderColor = '#ff5500';
+      }, 2000);
+      
+      if (maxVal >= 1099511627776) {
+        finishGame();
+      }
+    }
+
+    function updateBillboardUI() {
+      let maxVal = 0;
+      for (const id in students) {
+        const s = students[id];
+        if (s.secretValue > maxVal) {
+          maxVal = s.secretValue;
+        }
+      }
+
+      const percent = calculateLogProgress(maxVal);
+      document.getElementById('goal-progress-bar').style.width = `${percent}%`;
+      document.getElementById('goal-progress-text').textContent = `최고 비밀값: ${formatNumber(maxVal)} (${percent.toFixed(1)}% 달성)`;
+    }
+
+    // --- 19. Game Endings UI Sequence ---
+    function forceEndGame(success) {
+      playSound('beep_high');
+      clearInterval(gameInterval);
+      clearInterval(scanInterval);
+      
+      if (success) {
+        students['student_1'].secretValue = 1099511627776;
+      } else {
+        for (const id in students) {
+          if (Math.random() < 0.8) students[id].secretValue = 0;
+        }
+      }
+      finishGame();
+    }
+
+    function finishGame() {
+      isGameOver = true;
+      
+      let maxVal = 0;
+      for (const id in students) {
+        const s = students[id];
+        if (s.secretValue > maxVal) {
+          maxVal = s.secretValue;
+        }
+      }
+      
+      const success = (maxVal >= 1099511627776);
+      showGameResult(success);
+    }
+
+    function showGameResult(isSuccess) {
+      playSound(isSuccess ? 'success' : 'fail');
+
+      const endScreen = document.getElementById('end-screen');
+      const bannerText = document.getElementById('end-banner-text');
+      const statsSummary = document.getElementById('end-stats-summary');
+      const successTitle = document.getElementById('end-success-title');
+      const failureTitle = document.getElementById('end-failure-title');
+      
+      const successList = document.getElementById('end-success-list');
+      const failureList = document.getElementById('end-failure-list');
+      
+      let maxVal = 0;
+      let zeroCount = 0;
+      for (const id in students) {
+        const s = students[id];
+        if (s.secretValue > maxVal) maxVal = s.secretValue;
+        if (s.secretValue === 0) zeroCount++;
+      }
+
+      statsSummary.textContent = `최종 기록: 최댓값 ${formatNumber(maxVal)} | 감염자 수 (비밀값 0): ${zeroCount}명`;
+      
+      successList.innerHTML = '';
+      failureList.innerHTML = '';
+
+      if (isSuccess) {
+        bannerText.textContent = "MISSION VICTORY";
+        bannerText.className = "end-result-banner banner-success";
+        
+        successTitle.textContent = "🏆 미션에 성공한 시민 학생 명단";
+        failureTitle.textContent = "🔒 방해자(마피아) 및 감염 학생 명단 (격리)";
+
+        for (const id in students) {
+          const s = students[id];
+          const badge = document.createElement('div');
+          badge.className = 'end-student-badge';
+          badge.innerHTML = `<strong>${s.name}</strong><br>값: ${formatNumber(s.secretValue)}`;
+
+          if (s.secretValue === 0) {
+            badge.classList.add('mafia-highlight');
+            failureList.appendChild(badge);
+          } else {
+            successList.appendChild(badge);
+          }
+        }
+      } else {
+        bannerText.textContent = "MISSION FAILED";
+        bannerText.className = "end-result-banner banner-fail";
+        
+        successTitle.textContent = "💀 승리한 방해자(마피아) 및 감염 학생 명단";
+        failureTitle.textContent = "🔒 실패한 시민 학생 명단 (격리)";
+
+        for (const id in students) {
+          const s = students[id];
+          const badge = document.createElement('div');
+          badge.className = 'end-student-badge';
+          badge.innerHTML = `<strong>${s.name}</strong><br>값: ${formatNumber(s.secretValue)}`;
+
+          if (s.secretValue === 0) {
+            successList.appendChild(badge);
+          } else {
+            badge.classList.add('mafia-highlight');
+            failureList.appendChild(badge);
+          }
+        }
+      }
+
+      endScreen.style.display = 'flex';
+    }
+
+    function restartGame() {
+      playSound('click');
+      document.getElementById('end-screen').style.display = 'none';
+      document.getElementById('game-container').style.display = 'none';
+      document.getElementById('lobby-screen').style.display = 'flex';
+    }
+
+    // --- 20. Firebase Integration Handler ---
+    function connectFirebase() {
+      playSound('click');
+      
+      const apiKey = document.getElementById('fb-apikey').value.trim();
+      const dbUrl = document.getElementById('fb-dburl').value.trim();
+      const projId = document.getElementById('fb-projectid').value.trim();
+
+      if (!apiKey || !dbUrl) {
+        alert("API Key와 Database URL을 모두 입력해 주세요.");
+        return;
+      }
+
+      const firebaseConfig = {
+        apiKey: apiKey,
+        databaseURL: dbUrl,
+        projectId: projId
+      };
+
+      try {
+        if (firebase.apps.length === 0) {
+          fbApp = firebase.initializeApp(firebaseConfig);
+        } else {
+          fbApp = firebase.app();
+        }
+
+        fbDatabase = firebase.database();
+        isFirebaseConnected = true;
+        
+        fbRoomRef = fbDatabase.ref('rooms/school_session_1');
+
+        document.getElementById('firebase-status-text').textContent = "네트워크 상태: Firebase 실시간 연결됨";
+        document.getElementById('firebase-status-text').style.color = varColor('--neon-green');
+
+        uploadLocalStateToFirebase();
+        setupFirebaseSyncListeners();
+
+        alert("Firebase 실시간 데이터베이스 연동이 완료되었습니다!");
+      } catch (err) {
+        console.error(err);
+        alert("연결 중 오류 발생: " + err.message);
+        isFirebaseConnected = false;
+        document.getElementById('firebase-status-text').textContent = "네트워크 상태: 연결 실패 (로컬 모드)";
+        document.getElementById('firebase-status-text').style.color = varColor('--neon-red');
+      }
+    }
+
+    function uploadLocalStateToFirebase() {
+      if (!isFirebaseConnected) return;
+
+      const usersRef = fbRoomRef.child('users');
+      
+      for (const id in students) {
+        const s = students[id];
+        usersRef.child(s.id).set({
+          x: s.x,
+          y: s.y,
+          currentRoom: s.room,
+          name: s.name,
+          msg: s.chatBubble || '',
+          secretValue: s.secretValue,
+          isMafia: s.isMafia,
+          color: s.color,
+          direction: s.direction
+        });
+      }
+
+      fbRoomRef.child('interaction').set({
+        userA_id: '',
+        userB_id: '',
+        triggerMultiplication: false
+      });
+    }
+
+    function setupFirebaseSyncListeners() {
+      fbRoomRef.child('users').on('value', (snapshot) => {
+        if (!isFirebaseConnected) return;
+        const data = snapshot.val();
+        if (!data) return;
+
+        for (const id in data) {
+          const remoteUser = data[id];
+          const localUser = students[id];
+          
+          if (localUser) {
+            if (id !== currentControlledId || isAdmin) {
+              localUser.x = remoteUser.x;
+              localUser.y = remoteUser.y;
+              localUser.room = remoteUser.currentRoom;
+              localUser.direction = remoteUser.direction;
+            }
+            localUser.secretValue = remoteUser.secretValue;
+            localUser.isMafia = remoteUser.isMafia;
+            
+            if (remoteUser.msg && remoteUser.msg !== localUser.chatBubble) {
+              triggerBubbleChat(id, remoteUser.msg);
+            }
+          }
+        }
+        
+        updateBillboardUI();
+      });
+
+      fbRoomRef.child('interaction').on('value', (snapshot) => {
+        if (!isFirebaseConnected) return;
+        const data = snapshot.val();
+        if (!data) return;
+
+        if (data.triggerMultiplication && data.userA_id && data.userB_id) {
+          executeMultiplication(data.userA_id, data.userB_id);
+        }
+      });
+    }
+  </script>
+</body>
+</html>
