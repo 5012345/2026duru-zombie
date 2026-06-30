@@ -40,6 +40,14 @@
       --font-chalk: 'Gamja Flower', cursive;
     }
 
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+
     body {
       background-image: url('school_corridor_bg.png');
       background-size: cover;
@@ -48,8 +56,6 @@
       background-attachment: fixed;
       color: var(--text-main);
       font-family: var(--font-modern);
-      overflow-x: hidden;
-      min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -649,6 +655,10 @@
     .chat-log-card {
       flex: 1;
       min-height: 120px;
+      padding-bottom: 10px !important;
+    }
+    .chat-log-card::after {
+      display: none !important;
     }
 
     .chat-log-box {
@@ -1190,20 +1200,14 @@
 
         <!-- Chat Log Card -->
         <div class="panel-card chat-log-card">
-          <div class="panel-title" id="chat-title">현재 공간 채팅 로그 (강당)</div>
+          <div class="panel-title" id="chat-title">현재 공간 대화 로그 (강당)</div>
           <div class="chat-log-box" id="room-chat-log">
             <!-- Messages go here -->
-          </div>
-          <div class="pen-tray">
-            <span class="pen-black"></span>
-            <span class="pen-red"></span>
-            <span class="pen-blue"></span>
-            <span class="eraser"></span>
           </div>
         </div>
 
         <!-- Control Console Card (CCTV & Operations) -->
-        <div class="panel-card admin-console-card">
+        <div class="panel-card admin-console-card" id="cctv-card">
           <div class="panel-title">공간 관전 콘솔 (CCTV)</div>
           <div class="cctv-btn-grid">
             <button class="cctv-btn active" id="cctv-auditorium" onclick="setCCTV('auditorium')">강당</button>
@@ -1225,7 +1229,7 @@
         </div>
 
         <!-- Simulated Play Utilities -->
-        <div class="panel-card" style="gap: 8px;">
+        <div class="panel-card" id="test-tools-card" style="gap: 8px;">
           <div class="panel-title">테스트 도구 (로컬 시뮬레이션 전용)</div>
           <div class="swapper-row">
             <span style="font-size:0.8rem; font-family: var(--font-chalk);">조작 아바타:</span>
@@ -1246,7 +1250,7 @@
         </div>
 
         <!-- Firebase Config Card (Collapsible) -->
-        <div class="panel-card">
+        <div class="panel-card" id="firebase-config-card">
           <details class="firebase-details">
             <summary>🔗 Firebase RTDB 연동 설정</summary>
             <div class="firebase-form">
@@ -1564,10 +1568,10 @@
 
         // Doorway transition: Right side door (X: 300, Y: 820~880)
         if (ny >= 820 + r && ny <= 880 - r) {
-          if (nx > 300) {
+          if (nx >= 300) {
             student.room = 'hallway';
           } else {
-            nx = Math.max(minX, nx);
+            nx = Math.max(minX, Math.min(310, nx)); // Allow overlap to trigger transition
           }
         } else {
           nx = Math.max(minX, Math.min(maxX, nx));
@@ -1583,10 +1587,10 @@
 
         // Doorway transition: Left side door (X: 1100, Y: 820~880)
         if (ny >= 820 + r && ny <= 880 - r) {
-          if (nx < 1100) {
+          if (nx <= 1100) {
             student.room = 'hallway';
           } else {
-            nx = Math.min(maxX, nx);
+            nx = Math.max(1090, Math.min(maxX, nx)); // Allow overlap
           }
         } else {
           nx = Math.max(minX, Math.min(maxX, nx));
@@ -1602,10 +1606,10 @@
 
         // Doorway transition: Right side door (X: 300, Y: 1220~1280)
         if (ny >= 1220 + r && ny <= 1280 - r) {
-          if (nx > 300) {
+          if (nx >= 300) {
             student.room = 'hallway';
           } else {
-            nx = Math.max(minX, nx);
+            nx = Math.max(minX, Math.min(310, nx)); // Allow overlap
           }
         } else {
           nx = Math.max(minX, Math.min(maxX, nx));
@@ -1621,10 +1625,10 @@
 
         // Doorway transition: Left side door (X: 1100, Y: 1220~1280)
         if (ny >= 1220 + r && ny <= 1280 - r) {
-          if (nx < 1100) {
+          if (nx <= 1100) {
             student.room = 'hallway';
           } else {
-            nx = Math.min(maxX, nx);
+            nx = Math.max(1090, Math.min(maxX, nx)); // Allow overlap
           }
         } else {
           nx = Math.max(minX, Math.min(maxX, nx));
@@ -1638,13 +1642,13 @@
         let minY = bounds.y + r;
         let maxY = bounds.y + bounds.h - r;
 
-        // Expand horizontal movement bounds to include the long corridor branches
+        // Expand boundaries in door zones with 10px overlap to trigger inner doors
         if (ny >= 820 + r && ny <= 880 - r) {
-          minX = 300;
-          maxX = 1100;
+          minX = 290;
+          maxX = 1110;
         } else if (ny >= 1220 + r && ny <= 1280 - r) {
-          minX = 300;
-          maxX = 1100;
+          minX = 290;
+          maxX = 1110;
         }
 
         // Clamp positions
@@ -1653,15 +1657,15 @@
 
         // Check entry conditions
         if (ny >= 820 + r && ny <= 880 - r) {
-          if (nx < 300) {
+          if (nx <= 300) {
             student.room = 'class1';
-          } else if (nx > 1100) {
+          } else if (nx >= 1100) {
             student.room = 'class2';
           }
         } else if (ny >= 1220 + r && ny <= 1280 - r) {
-          if (nx < 300) {
+          if (nx <= 300) {
             student.room = 'toilet';
-          } else if (nx > 1100) {
+          } else if (nx >= 1100) {
             student.room = 'storage';
           }
         } 
@@ -1751,6 +1755,11 @@
         chatTitle.textContent = "대화 기록 모니터링 불가";
         chatLogBox.innerHTML = '<div class="chat-privacy-alert">🔒 [관리자 보호 모드]<br>학생들의 대화 내용은 관찰할 수 없습니다.</div>';
         
+        // Show Admin Panels
+        document.getElementById('cctv-card').style.display = 'flex';
+        document.getElementById('test-tools-card').style.display = 'flex';
+        document.getElementById('firebase-config-card').style.display = 'flex';
+
         // Admin camera setup
         cctvFollowPlayer = false;
         activeCCTV = 'auditorium';
@@ -1759,6 +1768,11 @@
         badge.className = "game-mode-badge badge-student";
         chatBar.style.display = 'flex';
         
+        // Hide Admin Panels in student mode so chat can stretch
+        document.getElementById('cctv-card').style.display = 'none';
+        document.getElementById('test-tools-card').style.display = 'none';
+        document.getElementById('firebase-config-card').style.display = 'none';
+
         // Show Secret Value Reveal Popup (Exactly once)
         showSecretCardPopup();
         cctvFollowPlayer = true;
@@ -2064,6 +2078,9 @@
 
     // --- 10. Event Keyboard Handlers ---
     function handleKeyDown(e) {
+      if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '].includes(e.key)) {
+        e.preventDefault(); // Prevent standard page scroll
+      }
       if (e.key === 'Tab') {
         e.preventDefault();
         // Cycle controlled avatar index (1 to 30)
