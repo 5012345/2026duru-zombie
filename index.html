@@ -1316,7 +1316,7 @@
             <button class="call-btn" onclick="callNPCToDesk('right')">우측 의자 →</button>
           </div>
           <div class="swapper-row" style="margin-top: 4px;">
-            <button class="call-btn" onclick="timeAcceleration()" style="background:#ff3366; flex: 1;">⏱️ 10배속 단축</button>
+            <button class="call-btn" onclick="resetSystem()" style="background:#ff3366; flex: 1;">🔄 시스템 초기화</button>
             <button class="call-btn" onclick="forceEndGame(true)" style="background:#00bb33; color:#fff;">성공 엔딩</button>
             <button class="call-btn" onclick="forceEndGame(false)" style="background:#cc2222; color:#fff;">실패 엔딩</button>
           </div>
@@ -3758,11 +3758,22 @@
       }
     }
 
-    function timeAcceleration() {
-      playSound('beep_high');
-      timerValue = Math.max(5, timerValue - 100);
-      updateClockUI();
-      performPeriodicDataScan();
+    function resetSystem() {
+      playSound('click');
+      if (confirm("시스템을 초기화하시겠습니까?\n현재 접속한 모든 참가자가 퇴장되고 데이터가 초기화됩니다.")) {
+        if (isFirebaseConnected) {
+          fbRoomRef.set(null).then(() => {
+            alert("시스템 초기화가 완료되었습니다.");
+            location.reload();
+          }).catch(err => {
+            console.error("System reset failed:", err);
+            alert("초기화 실패: " + err.message);
+          });
+        } else {
+          alert("로컬 시스템이 초기화되었습니다.");
+          location.reload();
+        }
+      }
     }
 
     function performPeriodicDataScan() {
@@ -4042,6 +4053,16 @@
 
         if (data.triggerMultiplication && data.userA_id && data.userB_id) {
           executeMultiplication(data.userA_id, data.userB_id);
+        }
+      });
+
+      fbRoomRef.child('game_started').on('value', (snap) => {
+        if (!isFirebaseConnected) return;
+        const started = snap.val();
+        // If system is reset (started is false/null) and this is a student currently in-game
+        if (!started && !isAdmin && document.getElementById('lobby-screen').style.display === 'none') {
+          alert("시스템이 초기화되었습니다. 로비로 이동합니다.");
+          location.reload();
         }
       });
     }
